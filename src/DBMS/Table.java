@@ -6,5 +6,5 @@ import java.util.Arrays;
 
 public class Table implements Serializable
 {
-	
+	ArrayList<String[]> records;
 }
