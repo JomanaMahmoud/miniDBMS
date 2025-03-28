@@ -17,9 +17,25 @@ public class DBApp
 {
 	static int dataPageSize = -100;
 
-	public static void createTable(String tableName, String[] columnsNames)
-	{
+	/**
+	 * Creates a new table.
+	 *
+	 * @param tableName The name of the table you want to create.
+	 * @param newtable  The instance of the table created
+	 */
 
+	public static void createTable(String tableName, String[] columnsNames) {
+		if (tableName == null || tableName == "" || tableName == " ") {
+			throw new IllegalArgumentException("Table name cannot be null");
+		}
+		if (columnsNames == null || columnsNames.length == 0) {
+			throw new IllegalArgumentException("column name cannot be null");
+		}
+		if (FileManager.loadTable(tableName)!=null){
+			throw new IllegalArgumentException("Table already exists");
+		}
+		Table newTable = new Table(tableName, dataPageSize, columnsNames);
+		FileManager.storeTable(tableName,newTable);
 	}
 
 	/**
@@ -44,7 +60,7 @@ public class DBApp
 	public static ArrayList<String []> select(String tableName)
 	{
 		Table t = FileManager.loadTable(tableName);
-		return t.records;
+		return t.getRecords();
 	}
 
 	public static ArrayList<String []> select(String tableName, int pageNumber, int recordNumber)
@@ -72,11 +88,23 @@ public class DBApp
 	}
 
 
-	public static void main(String []args) throws IOException
-	{
+	public static void main(String[] args) {
+		try {
+			// Define the table name and columns
+			String[] cols = {"id", "name", "major", "semester", "gpa"};
 
+			// Call createTable function
+			createTable("student", cols);
 
+			// Print confirmation message
+			System.out.println("Table 'student' created successfully!");
+
+		} catch (Exception e) {
+			System.out.println("Error: " + e.getMessage());
+		}
 	}
+
+
 
 
 

@@ -44,4 +44,9 @@ public class Page implements Serializable
     {
         records.add(record);
     }
+
+    public ArrayList<String[]> getRecords() {
+        return records;  // Assuming records is an ArrayList<String[]>
+    }
+
 }

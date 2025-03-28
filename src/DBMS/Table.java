@@ -60,4 +60,15 @@ public class Table implements Serializable
 		lastPage.insert(record);
 		FileManager.storeTable(tableName, lastPage);
 	}
+	public ArrayList<String[]> getRecords() {
+		ArrayList<String[]> allRecords = new ArrayList<>();
+
+		for (Page page : pages) {
+			allRecords.addAll(page.getRecords());  // Fetch records from each page
+		}
+
+		return allRecords;
+	}
+
+
 }
