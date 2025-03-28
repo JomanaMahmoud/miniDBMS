@@ -58,6 +58,6 @@ public class Table implements Serializable
 		}
 
 		lastPage.insert(record);
-		FileManager.storeTable(tableName, lastPage);
+		FileManager.storeTablePage(tableName,lastPage.getPageNumber(), lastPage);
 	}
 }

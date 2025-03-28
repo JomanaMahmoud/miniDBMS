@@ -44,7 +44,7 @@ public class DBApp
 	public static ArrayList<String []> select(String tableName)
 	{
 		Table t = FileManager.loadTable(tableName);
-		return t.records;
+		return new ArrayList<String []>();
 	}
 
 	public static ArrayList<String []> select(String tableName, int pageNumber, int recordNumber)
