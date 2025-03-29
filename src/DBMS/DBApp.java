@@ -59,10 +59,6 @@ public class DBApp {
 		Table t = FileManager.loadTable(tableName);
 		if (t != null) {
 			t.insert(record);
-<<<<<<< Updated upstream
-			
-=======
->>>>>>> Stashed changes
 		} else {
 			System.out.println("Table " + tableName + " not found.");
 		}
