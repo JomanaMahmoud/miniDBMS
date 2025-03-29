@@ -71,8 +71,28 @@ public class DBApp {
 	}
 
 	public static ArrayList<String[]> select(String tableName, int pageNumber, int recordNumber) {
-		return new ArrayList<>();
+		Table t = FileManager.loadTable(tableName);
+		if (t == null) {
+			System.out.println("Table " + tableName + " not found.");
+			return new ArrayList<>();
+		}
+
+		Page page = t.getPage(pageNumber);
+		if (page == null) {
+			System.out.println("Page " + pageNumber + " not found.");
+			return new ArrayList<>();
+		}
+
+		String[] record = page.getRecord(recordNumber);
+		ArrayList<String[]> result = new ArrayList<>();
+
+		if (record != null) {
+			result.add(record);
+		}
+
+		return result;
 	}
+
 
 
 	public static ArrayList<String[]> select(String tableName, String[] cols, String[] vals) {
@@ -86,7 +106,7 @@ public class DBApp {
 		ArrayList<String[]> records = t.getRecords();
 		ArrayList<String[]> result = new ArrayList<>();
 
-		// Get column indexes that match the specified column names
+
 		String[] columnNames = t.getColumnNames();
 		ArrayList<Integer> colIndexes = new ArrayList<>();
 
@@ -96,7 +116,7 @@ public class DBApp {
 			for (int i = 0; i < columnNames.length; i++) {
 				if (columnNames[i].equals(col)) {
 					index = i;
-					break;  // Exit loop early (no need to continue searching)
+					break;
 				}
 			}
 
@@ -108,7 +128,6 @@ public class DBApp {
 			colIndexes.add(index);
 		}
 
-		// Iterate over records and check if they match the given values
 		for (String[] record : records) {
 			boolean match = true;
 			for (int i = 0; i < cols.length; i++) {
@@ -139,6 +158,6 @@ public class DBApp {
 
 
 	public static void main(String[] args) {
-		
+
 	}
 }
