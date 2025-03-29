@@ -59,6 +59,7 @@ public class DBApp {
 		Table t = FileManager.loadTable(tableName);
 		if (t != null) {
 			t.insert(record);
+			FileManager.storeTable(tableName, t);
 		} else {
 			System.out.println("Table " + tableName + " not found.");
 		}
