@@ -72,7 +72,8 @@ public class DBApp {
 	}
 
 	public static ArrayList<String[]> select(String tableName, int pageNumber, int recordNumber) {
-
+		Table t = FileManager.loadTable(tableName);
+		Page p = ;
 		return new ArrayList<String[]>();
 	}
 
@@ -93,7 +94,14 @@ public class DBApp {
 
 
 	public static void main(String[] args) {
-
+		System.out.println("Output of selecting the whole table content:");
+		ArrayList<String[]> result1 = select("student");
+		for (String[] array : result1) {
+			for (String str : array) {
+				System.out.print(str + " ");
+			}
+			System.out.println();
+		}
 
 	}
 }

@@ -73,5 +73,12 @@ public class Table implements Serializable
 		return allRecords;
 	}
 
+	public Page getPage(int pageNumber) {
+		if (pageNumber >= 0 && pageNumber < pages.size()) {
+			return pages.get(pageNumber);
+		} else {
+			return null;
+		}
+	}
 
 }
