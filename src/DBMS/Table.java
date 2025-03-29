@@ -9,10 +9,13 @@ import java.util.Arrays;
  */
 public class Table implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private final String tableName;
 	private final String[] columnNames;
 	private ArrayList<Page> pages;
 	private int pageSize;
+
 
 	/**
 	 * Constructs a new Table.
