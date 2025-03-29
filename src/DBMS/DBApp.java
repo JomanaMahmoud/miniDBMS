@@ -76,9 +76,56 @@ public class DBApp {
 
 
 	public static ArrayList<String[]> select(String tableName, String[] cols, String[] vals) {
+		Table t = FileManager.loadTable(tableName);
 
-		return new ArrayList<String[]>();
+		if (t == null) {
+			System.out.println("Table " + tableName + " not found.");
+			return new ArrayList<>();
+		}
+
+		ArrayList<String[]> records = t.getRecords();
+		ArrayList<String[]> result = new ArrayList<>();
+
+		// Get column indexes that match the specified column names
+		String[] columnNames = t.getColumnNames();
+		ArrayList<Integer> colIndexes = new ArrayList<>();
+
+		for (String col : cols) {
+			int index = -1;
+
+			for (int i = 0; i < columnNames.length; i++) {
+				if (columnNames[i].equals(col)) {
+					index = i;
+					break;  // Exit loop early (no need to continue searching)
+				}
+			}
+
+			if (index == -1) {
+				System.out.println("Column " + col + " not found.");
+				return new ArrayList<>();
+			}
+
+			colIndexes.add(index);
+		}
+
+		// Iterate over records and check if they match the given values
+		for (String[] record : records) {
+			boolean match = true;
+			for (int i = 0; i < cols.length; i++) {
+				int colIndex = colIndexes.get(i);
+				if (!record[colIndex].equals(vals[i])) {
+					match = false;
+					break;
+				}
+			}
+			if (match) {
+				result.add(record);
+			}
+		}
+
+		return result;
 	}
+
 
 	public static String getFullTrace(String tableName) {
 
@@ -92,30 +139,6 @@ public class DBApp {
 
 
 	public static void main(String[] args) {
-		//String[] cols = {"id","name","major","semester","gpa"};
-		//createTable("student", cols);
-		String[] r1 = {"1", "stud1", "CS", "5", "0.9"};
-		insert("student", r1);
-
-		String[] r2 = {"2", "stud2", "BI", "7", "1.2"};
-		insert("student", r2);
-
-		String[] r3 = {"3", "stud3", "CS", "2", "2.4"};
-		insert("student", r3);
-
-		String[] r4 = {"4", "stud4", "DMET", "9", "1.2"};
-		insert("student", r4);
-
-		String[] r5 = {"5", "stud5", "BI", "4", "3.5"};
-		insert("student", r5);
-		System.out.println("Output of selecting the whole table content:");
-		ArrayList<String[]> result1 = select("student",1,1);
-		for (String[] array : result1) {
-			for (String str : array) {
-				System.out.print(str + " ");
-			}
-			System.out.println();
-		}
-
+		
 	}
 }

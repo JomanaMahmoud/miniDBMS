@@ -73,6 +73,10 @@ public class Table implements Serializable
 		return allRecords;
 	}
 
+	public String[] getColumnNames() {
+		return columnNames;
+	}
+
 	public Page getPage(int pageNumber) {
 		if (pageNumber >= 0 && pageNumber < pages.size()) {
 			return pages.get(pageNumber);
