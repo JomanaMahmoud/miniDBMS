@@ -26,6 +26,15 @@ public class Page implements Serializable
     }
 
     /**
+     * Retrieves the current page number.
+     *
+     * @return the page number
+     */
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+    /**
      * Checks if the page is full.
      *
      * @return True if the page has reached its maximum capacity, otherwise false.

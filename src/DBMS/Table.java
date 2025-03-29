@@ -58,7 +58,7 @@ public class Table implements Serializable
 		}
 
 		lastPage.insert(record);
-		FileManager.storeTable(tableName, lastPage);
+		FileManager.storeTablePage(tableName,lastPage.getPageNumber(), lastPage);
 	}
 	public ArrayList<String[]> getRecords() {
 		ArrayList<String[]> allRecords = new ArrayList<>();
