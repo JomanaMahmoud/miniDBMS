@@ -59,6 +59,7 @@ public class DBApp {
 		Table t = FileManager.loadTable(tableName);
 		if (t != null) {
 			t.insert(record);
+			FileManager.storeTable(tableName, t);
 		} else {
 			System.out.println("Table " + tableName + " not found.");
 		}
@@ -66,7 +67,8 @@ public class DBApp {
 
 	public static ArrayList<String[]> select(String tableName) {
 		Table t = FileManager.loadTable(tableName);
-		return new ArrayList<String[]>();
+		ArrayList<String[]> result = t.getRecords();
+		return result;
 	}
 
 	public static ArrayList<String[]> select(String tableName, int pageNumber, int recordNumber) {
@@ -91,6 +93,7 @@ public class DBApp {
 
 
 	public static void main(String[] args) {
+
 
 	}
 }
