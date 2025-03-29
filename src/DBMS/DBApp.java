@@ -59,7 +59,10 @@ public class DBApp {
 		Table t = FileManager.loadTable(tableName);
 		if (t != null) {
 			t.insert(record);
+<<<<<<< Updated upstream
 			
+=======
+>>>>>>> Stashed changes
 		} else {
 			System.out.println("Table " + tableName + " not found.");
 		}
@@ -72,10 +75,9 @@ public class DBApp {
 	}
 
 	public static ArrayList<String[]> select(String tableName, int pageNumber, int recordNumber) {
-		Table t = FileManager.loadTable(tableName);
-		Page p = ;
-		return new ArrayList<String[]>();
+		return new ArrayList<>();
 	}
+
 
 	public static ArrayList<String[]> select(String tableName, String[] cols, String[] vals) {
 
@@ -94,8 +96,24 @@ public class DBApp {
 
 
 	public static void main(String[] args) {
+		//String[] cols = {"id","name","major","semester","gpa"};
+		//createTable("student", cols);
+		String[] r1 = {"1", "stud1", "CS", "5", "0.9"};
+		insert("student", r1);
+
+		String[] r2 = {"2", "stud2", "BI", "7", "1.2"};
+		insert("student", r2);
+
+		String[] r3 = {"3", "stud3", "CS", "2", "2.4"};
+		insert("student", r3);
+
+		String[] r4 = {"4", "stud4", "DMET", "9", "1.2"};
+		insert("student", r4);
+
+		String[] r5 = {"5", "stud5", "BI", "4", "3.5"};
+		insert("student", r5);
 		System.out.println("Output of selecting the whole table content:");
-		ArrayList<String[]> result1 = select("student");
+		ArrayList<String[]> result1 = select("student",1,1);
 		for (String[] array : result1) {
 			for (String str : array) {
 				System.out.print(str + " ");
