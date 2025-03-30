@@ -61,7 +61,11 @@ public class Table implements Serializable
 		}
 
 		lastPage.insert(record);
-		FileManager.storeTablePage(tableName,lastPage.getPageNumber(), lastPage);
+		
+		boolean storeTablePage = false;
+		storeTablePage = FileManager.storeTablePage(tableName,lastPage.getPageNumber(), lastPage);
+		if(!storeTablePage)
+			System.err.println("Error: Table '" + tableName + "' could not be stored correctly.");
 	}
 	public ArrayList<String[]> getRecords() {
 		ArrayList<String[]> allRecords = new ArrayList<>();

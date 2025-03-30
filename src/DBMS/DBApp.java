@@ -1,6 +1,7 @@
 package DBMS;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,14 +55,22 @@ public class DBApp {
 	 *
 	 * @param tableName The name of the table to insert into.
 	 * @param record    An array of values representing the record.
+	 * @throws FileNotFoundException 
 	 */
-	public static void insert(String tableName, String[] record) {
+	public static void insert(String tableName, String[] record){
+		if (tableName == null || record == null) {
+	        throw new IllegalArgumentException("Table name and record must not be null.");
+	    }
+		
 		Table t = FileManager.loadTable(tableName);
 		if (t != null) {
 			t.insert(record);
-			FileManager.storeTable(tableName, t);
+			boolean storeTable = false;
+			storeTable = FileManager.storeTable(tableName, t);
+			if(!storeTable)
+				System.err.println("Error: Table '" + tableName + "' could not be stored correctly.");
 		} else {
-			System.out.println("Table " + tableName + " not found.");
+			System.err.println("Error: Table '" + tableName + "' not found.");
 		}
 	}
 
@@ -159,6 +168,6 @@ public class DBApp {
 
 
 	public static void main(String[] args) {
-
+		
 	}
 }
