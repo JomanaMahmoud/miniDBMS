@@ -1,7 +1,6 @@
 package DBMS;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,9 +54,8 @@ public class DBApp {
 	 *
 	 * @param tableName The name of the table to insert into.
 	 * @param record    An array of values representing the record.
-	 * @throws FileNotFoundException 
 	 */
-	public static void insert(String tableName, String[] record){
+	public static void insert(String tableName, String[] record) {
 		if (tableName == null || record == null) {
 	        throw new IllegalArgumentException("Table name and record must not be null.");
 	    }
