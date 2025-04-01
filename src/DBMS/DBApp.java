@@ -44,7 +44,7 @@ public class DBApp {
 			return;
 		}
 
-		Table newTable = new Table(tableName, 100, columnsNames);
+		Table newTable = new Table(tableName,dataPageSize, columnsNames);
 		FileManager.storeTable(tableName, newTable);
 	}
 
