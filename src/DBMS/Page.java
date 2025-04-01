@@ -58,4 +58,13 @@ public class Page implements Serializable
         return records;  // Assuming records is an ArrayList<String[]>
     }
 
+    public String[] getRecord(int recordIndex) {
+        if (recordIndex >= 0 && recordIndex < records.size()) {
+            return records.get(recordIndex);
+        } else {
+            return null;
+        }
+    }
+
+
 }

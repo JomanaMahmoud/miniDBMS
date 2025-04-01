@@ -56,28 +56,103 @@ public class DBApp {
 	 * @param record    An array of values representing the record.
 	 */
 	public static void insert(String tableName, String[] record) {
+		if (tableName == null || record == null) {
+	        throw new IllegalArgumentException("Table name and record must not be null.");
+	    }
+		
 		Table t = FileManager.loadTable(tableName);
 		if (t != null) {
 			t.insert(record);
+			boolean storeTable = false;
+			storeTable = FileManager.storeTable(tableName, t);
+			if(!storeTable)
+				System.err.println("Error: Table '" + tableName + "' could not be stored correctly.");
 		} else {
-			System.out.println("Table " + tableName + " not found.");
+			System.err.println("Error: Table '" + tableName + "' not found.");
 		}
 	}
 
 	public static ArrayList<String[]> select(String tableName) {
 		Table t = FileManager.loadTable(tableName);
-		return new ArrayList<String[]>();
+		ArrayList<String[]> result = t.getRecords();
+		return result;
 	}
 
 	public static ArrayList<String[]> select(String tableName, int pageNumber, int recordNumber) {
+		Table t = FileManager.loadTable(tableName);
+		if (t == null) {
+			System.out.println("Table " + tableName + " not found.");
+			return new ArrayList<>();
+		}
 
-		return new ArrayList<String[]>();
+		Page page = t.getPage(pageNumber);
+		if (page == null) {
+			System.out.println("Page " + pageNumber + " not found.");
+			return new ArrayList<>();
+		}
+
+		String[] record = page.getRecord(recordNumber);
+		ArrayList<String[]> result = new ArrayList<>();
+
+		if (record != null) {
+			result.add(record);
+		}
+
+		return result;
 	}
+
+
 
 	public static ArrayList<String[]> select(String tableName, String[] cols, String[] vals) {
+		Table t = FileManager.loadTable(tableName);
 
-		return new ArrayList<String[]>();
+		if (t == null) {
+			System.out.println("Table " + tableName + " not found.");
+			return new ArrayList<>();
+		}
+
+		ArrayList<String[]> records = t.getRecords();
+		ArrayList<String[]> result = new ArrayList<>();
+
+
+		String[] columnNames = t.getColumnNames();
+		ArrayList<Integer> colIndexes = new ArrayList<>();
+
+		for (String col : cols) {
+			int index = -1;
+
+			for (int i = 0; i < columnNames.length; i++) {
+				if (columnNames[i].equals(col)) {
+					index = i;
+					break;
+				}
+			}
+
+			if (index == -1) {
+				System.out.println("Column " + col + " not found.");
+				return new ArrayList<>();
+			}
+
+			colIndexes.add(index);
+		}
+
+		for (String[] record : records) {
+			boolean match = true;
+			for (int i = 0; i < cols.length; i++) {
+				int colIndex = colIndexes.get(i);
+				if (!record[colIndex].equals(vals[i])) {
+					match = false;
+					break;
+				}
+			}
+			if (match) {
+				result.add(record);
+			}
+		}
+
+		return result;
 	}
+
 
 	public static String getFullTrace(String tableName) {
 
@@ -91,6 +166,6 @@ public class DBApp {
 
 
 	public static void main(String[] args) {
-
+		
 	}
 }
