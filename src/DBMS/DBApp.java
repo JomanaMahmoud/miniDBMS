@@ -68,17 +68,22 @@ public class DBApp {
 		
 		Table t = FileManager.loadTable(tableName);
 		if (t != null) {
+			long startTime = System.nanoTime();  // Start time for execution time calculation
 			t.insert(record);
 			boolean storeTable = false;
 			storeTable = FileManager.storeTable(tableName, t);
 			if(!storeTable) {
 				System.err.println("Error: Table '" + tableName + "' could not be stored correctly.");
 			}
-			// Log the insert trace directly
+
+			long endTime = System.nanoTime();  // End time for execution time calculation
+			long executionTime = (endTime - startTime) / 1000000;  // Convert to milliseconds
+
+			// Log the insert trace directly with execution time
 			if (!tableTraces.containsKey(tableName)) {
 				tableTraces.put(tableName, new ArrayList<>());
 			}
-			tableTraces.get(tableName).add("Inserted record: " + Arrays.toString(record));
+			tableTraces.get(tableName).add("Inserted: " + Arrays.toString(record) + ", at page number: " + t.size() + ", execution time (mil):" + executionTime);
 
 
 
@@ -88,8 +93,14 @@ public class DBApp {
 	}
 
 	public static ArrayList<String[]> select(String tableName) {
+		long startTime = System.nanoTime();  // Start time for execution time calculation
+
 		Table t = FileManager.loadTable(tableName);
 		ArrayList<String[]> result = t.getRecords();
+
+		long endTime = System.nanoTime();  // End time for execution time calculation
+		long executionTime = (endTime - startTime) / 1000000;  // Convert to milliseconds
+
 		return result;
 	}
 
