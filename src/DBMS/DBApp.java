@@ -3,10 +3,7 @@ package DBMS;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 import org.junit.Test;
 /**
@@ -16,6 +13,8 @@ import org.junit.Test;
 public class DBApp {
 	static int dataPageSize = -100;
 
+	// A map to store traces for each table.
+	private static Map<String, ArrayList<String>> tableTraces = new HashMap<>();
 	/**
 	 * Creates a new table.
 	 *
