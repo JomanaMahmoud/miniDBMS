@@ -11,7 +11,7 @@ import org.junit.Test;
  * It provides functionalities for creating tables, inserting records, and selecting data.
  */
 public class DBApp {
-	static int dataPageSize = 3;
+	static int dataPageSize = 2;
 
 	// A map to store traces for each table.
 	private static Map<String, ArrayList<String>> tableTraces = new HashMap<>();
