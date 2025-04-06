@@ -94,4 +94,14 @@ public class Table implements Serializable
 	public ArrayList<Page> getPages() {
 		return pages;  // Returns the internal list of pages
 	}
+
+	public int getPagesCount() { return pages.size(); }
+
+	public int getRecordsCount() {
+		int numberOfRecords = 0;
+		for (Page page : pages) {
+			numberOfRecords += page.getRecordsCount();
+		}
+		return numberOfRecords;
+	}
 }

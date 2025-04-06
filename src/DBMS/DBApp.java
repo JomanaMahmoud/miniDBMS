@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 /**
@@ -210,9 +211,12 @@ public class DBApp {
 				pageMatchCounts.put(pageNum, count);
 			}
 		}
+		String entrySet = pageMatchCounts.entrySet().stream()
+				.map(e -> "[" + e.getKey() + ", " + e.getValue() + "]")
+				.collect(Collectors.joining(", ", "[", "]"));
 
 		tableTraces.get(tableName).add("Select condition:" + Arrays.toString(cols) + "->" + Arrays.toString(vals) +
-				", Records per page:" + pageMatchCounts.entrySet().toString() +
+				", Records per page:" + entrySet +
 				", records:" + result.size() + ", execution time (mil):" + executionTime);
 
 		return result;
@@ -224,6 +228,10 @@ public class DBApp {
 		ArrayList<String> trace = tableTraces.get(tableName);
 		if (trace == null) {
 			return "No traces found for table " + tableName;
+		}
+		else {
+			Table t = FileManager.loadTable(tableName);
+			trace.add("Pages Count: " + t.getPagesCount() + ", Records Count: " + t.getRecordsCount());
 		}
 		return String.join("\n", trace);
 	}

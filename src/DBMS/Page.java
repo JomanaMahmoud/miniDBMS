@@ -67,5 +67,5 @@ public class Page implements Serializable
         }
     }
 
-
+    public int getRecordsCount() { return records.size(); }
 }
