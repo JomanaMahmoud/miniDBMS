@@ -11,7 +11,7 @@ import org.junit.Test;
  * It provides functionalities for creating tables, inserting records, and selecting data.
  */
 public class DBApp {
-	static int dataPageSize = -100;
+	static int dataPageSize = 3;
 
 	// A map to store traces for each table.
 	private static Map<String, ArrayList<String>> tableTraces = new HashMap<>();
@@ -50,8 +50,9 @@ public class DBApp {
 		if (!tableTraces.containsKey(tableName)) {
 			tableTraces.put(tableName, new ArrayList<>());
 		}
-		// Log the creation trace directly
-		tableTraces.get(tableName).add("Created table with columns: " + String.join(", ", columnsNames));
+		// Log the creation trace
+		tableTraces.get(tableName).add("Table created name:" + tableName + ", columnsNames:" + Arrays.toString(columnsNames));
+
 	}
 
 
@@ -80,12 +81,8 @@ public class DBApp {
 			long executionTime = (endTime - startTime) / 1000000;  // Convert to milliseconds
 
 			// Log the insert trace directly with execution time
-			if (!tableTraces.containsKey(tableName)) {
-				tableTraces.put(tableName, new ArrayList<>());
-			}
-			tableTraces.get(tableName).add("Inserted: " + Arrays.toString(record) + ", at page number: " + t.size() + ", execution time (mil):" + executionTime);
-
-
+			int lastPageNumber = t.getPages().get(t.getPages().size() - 1).getPageNumber();
+			tableTraces.get(tableName).add("Inserted:[" + String.join(", ", record) + "], at page number:" + lastPageNumber + ", execution time (mil):" + executionTime);
 
 		} else {
 			System.err.println("Error: Table '" + tableName + "' not found.");
@@ -101,10 +98,18 @@ public class DBApp {
 		long endTime = System.nanoTime();  // End time for execution time calculation
 		long executionTime = (endTime - startTime) / 1000000;  // Convert to milliseconds
 
+
+		// Log the select trace directly with execution time
+		tableTraces.get(tableName).add("Select all pages:" + t.getPages().size() + ", records:" + result.size() + ", execution time (mil):" + executionTime);
+
+
 		return result;
 	}
 
 	public static ArrayList<String[]> select(String tableName, int pageNumber, int recordNumber) {
+		long startTime = System.nanoTime();  // Start time for execution time calculation
+
+
 		Table t = FileManager.loadTable(tableName);
 		if (t == null) {
 			System.out.println("Table " + tableName + " not found.");
@@ -124,12 +129,19 @@ public class DBApp {
 			result.add(record);
 		}
 
+		long endTime = System.nanoTime();
+		long executionTime = (endTime - startTime) / 1000000;
+
+
+		tableTraces.get(tableName).add("Select pointer page:" + pageNumber + ", record:" + recordNumber + ", total output count:" + result.size() + ", execution time (mil):" + executionTime);
+
 		return result;
 	}
 
 
 
 	public static ArrayList<String[]> select(String tableName, String[] cols, String[] vals) {
+		long startTime = System.nanoTime();
 		Table t = FileManager.loadTable(tableName);
 
 		if (t == null) {
@@ -176,6 +188,33 @@ public class DBApp {
 			}
 		}
 
+		long endTime = System.nanoTime();
+		long executionTime = (endTime - startTime) / 1000000;
+
+		Map<Integer, Integer> pageMatchCounts = new HashMap<>();
+		for (Page page : t.getPages()) {
+			int pageNum = page.getPageNumber();
+			int count = 0;
+			for (String[] rec : page.getRecords()) {
+				boolean match = true;
+				for (int i = 0; i < cols.length; i++) {
+					int colIndex = colIndexes.get(i);
+					if (!rec[colIndex].equals(vals[i])) {
+						match = false;
+						break;
+					}
+				}
+				if (match) count++;
+			}
+			if (count > 0) {
+				pageMatchCounts.put(pageNum, count);
+			}
+		}
+
+		tableTraces.get(tableName).add("Select condition:" + Arrays.toString(cols) + "->" + Arrays.toString(vals) +
+				", Records per page:" + pageMatchCounts.entrySet().toString() +
+				", records:" + result.size() + ", execution time (mil):" + executionTime);
+
 		return result;
 	}
 
@@ -186,7 +225,9 @@ public class DBApp {
 		if (trace == null) {
 			return "No traces found for table " + tableName;
 		}
-		return String.join("\n", trace);	}
+		return String.join("\n", trace);
+	}
+
 
 	public static String getLastTrace(String tableName) {
 

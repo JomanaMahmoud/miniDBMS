@@ -3,6 +3,7 @@ package DBMS;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Represents a table within the DBMS.
@@ -89,4 +90,8 @@ public class Table implements Serializable
 		}
 	}
 
+
+	public ArrayList<Page> getPages() {
+		return pages;  // Returns the internal list of pages
+	}
 }

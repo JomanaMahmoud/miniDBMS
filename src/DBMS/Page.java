@@ -21,8 +21,9 @@ public class Page implements Serializable
     public Page(int pageSize,int pageNumber)
     {
         this.pageNumber = pageNumber;
-        records = new ArrayList<String[]>();
         this.pageSize = pageSize;
+        this.records = new ArrayList<String[]>();
+
     }
 
     /**
