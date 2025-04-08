@@ -18,11 +18,11 @@ public class FileManager
 	
     public static boolean storeTable(String tableName, Table t)
 	{
-		try {
-			TimeUnit.MILLISECONDS.sleep(1);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-		}
+//		try {
+//			TimeUnit.MILLISECONDS.sleep(1);
+//		} catch (InterruptedException e1) {
+//			// TODO Auto-generated catch block
+//		}
 		File tableDirectory = new File(directory, tableName);
 		tableDirectory.mkdirs();
 	    File fl = new File(tableDirectory, tableName+".db");
@@ -44,11 +44,11 @@ public class FileManager
     
     public static Table loadTable(String tableName)
 	{
-		try {
-			TimeUnit.MILLISECONDS.sleep(1);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
+//		try {
+//			TimeUnit.MILLISECONDS.sleep(1);
+//		} catch (InterruptedException e1) {
+//			e1.printStackTrace();
+//		}
 		File tableDirectory = new File(directory, tableName);
 	    File fl = new File(tableDirectory, tableName+".db");
 	    
@@ -69,11 +69,11 @@ public class FileManager
     
 	public static boolean storeTablePage(String tableName, int pageNumber, Page p)
 	{
-		try {
-			TimeUnit.MILLISECONDS.sleep(1);
-		} catch (InterruptedException e1) {
-			
-		}
+//		try {
+//			TimeUnit.MILLISECONDS.sleep(1);
+//		} catch (InterruptedException e1) {
+//
+//		}
 		File tableDirectory = new File(directory, tableName);
 		tableDirectory.mkdir();
 	    File fl = new File(tableDirectory, ""+pageNumber+".db");
@@ -104,17 +104,17 @@ public class FileManager
 	    File fl = new File(tableDirectory, ""+pageNumber+".db");
 	    
 	    Page res = null;
-	    try 
-		{
-			FileInputStream fin = new FileInputStream(fl);
-			ObjectInputStream ois = new ObjectInputStream(fin);
-			res = (Page)ois.readObject();
-			ois.close();
-		} 
-		catch (Exception e)
-		{
-			
-		}
+//	    try
+//		{
+//			FileInputStream fin = new FileInputStream(fl);
+//			ObjectInputStream ois = new ObjectInputStream(fin);
+//			res = (Page)ois.readObject();
+//			ois.close();
+//		}
+//		catch (Exception e)
+//		{
+//
+//		}
 	    return res;
 	}
 	
