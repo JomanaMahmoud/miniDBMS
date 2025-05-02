@@ -13,8 +13,9 @@ public class FileManager
 {
 	
 	static String path = FileManager.class.getResource("FileManager.class").toString();
-    static File directory = new File(path.substring(6,path.length()-17) + File.separator 
+    static File directory = new File(path.substring(6,path.length()-17) + File.separator
     		+ "Tables" + File.separator);
+//	static File directory = new File( "Tables" + File.separator);
 	
     public static boolean storeTable(String tableName, Table t)
 	{
@@ -22,6 +23,7 @@ public class FileManager
 //			TimeUnit.MILLISECONDS.sleep(1);
 //		} catch (InterruptedException e1) {
 //			// TODO Auto-generated catch block
+////			e1.printStackTrace();
 //		}
 		File tableDirectory = new File(directory, tableName);
 		tableDirectory.mkdirs();
@@ -37,6 +39,7 @@ public class FileManager
 		} 
 		catch (Exception e)
 		{
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
@@ -47,6 +50,7 @@ public class FileManager
 //		try {
 //			TimeUnit.MILLISECONDS.sleep(1);
 //		} catch (InterruptedException e1) {
+//			// TODO Auto-generated catch block
 //			e1.printStackTrace();
 //		}
 		File tableDirectory = new File(directory, tableName);
@@ -62,7 +66,8 @@ public class FileManager
 		} 
 		catch (Exception e)
 		{
-			
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
 		}
 	    return res;
 	}
@@ -72,7 +77,8 @@ public class FileManager
 //		try {
 //			TimeUnit.MILLISECONDS.sleep(1);
 //		} catch (InterruptedException e1) {
-//
+//			// TODO Auto-generated catch block
+////			e1.printStackTrace();
 //		}
 		File tableDirectory = new File(directory, tableName);
 		tableDirectory.mkdir();
@@ -88,6 +94,7 @@ public class FileManager
 		} 
 		catch (Exception e)
 		{
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
@@ -95,26 +102,83 @@ public class FileManager
 	
 	public static Page loadTablePage(String tableName, int pageNumber)
 	{
-		try {
-			TimeUnit.MILLISECONDS.sleep(1);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
+//		try {
+//			TimeUnit.MILLISECONDS.sleep(1);
+//		} catch (InterruptedException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 		File tableDirectory = new File(directory, tableName);
 	    File fl = new File(tableDirectory, ""+pageNumber+".db");
 	    
 	    Page res = null;
-//	    try
-//		{
-//			FileInputStream fin = new FileInputStream(fl);
-//			ObjectInputStream ois = new ObjectInputStream(fin);
-//			res = (Page)ois.readObject();
-//			ois.close();
+	    try 
+		{
+			FileInputStream fin = new FileInputStream(fl);
+			ObjectInputStream ois = new ObjectInputStream(fin);
+			res = (Page)ois.readObject();
+			ois.close();
+		} 
+		catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
+		}
+	    return res;
+	}
+	
+	public static boolean storeTableIndex(String tableName, String columnName, BitmapIndex b)
+	{
+//		try {
+//			TimeUnit.MILLISECONDS.sleep(1);
+//		} catch (InterruptedException e1) {
+//			// TODO Auto-generated catch block
+////			e1.printStackTrace();
 //		}
-//		catch (Exception e)
-//		{
-//
+		File tableDirectory = new File(directory, tableName);
+		tableDirectory.mkdir();
+	    File fl = new File(tableDirectory, ""+columnName+".db");
+	    
+		try 
+		{
+			FileOutputStream fout = new FileOutputStream(fl);
+			ObjectOutputStream oos = new ObjectOutputStream(fout);
+			oos.writeObject(b);
+			oos.close();
+			return true;
+		} 
+		catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public static BitmapIndex loadTableIndex(String tableName, String columnName)
+	{
+//		try {
+//			TimeUnit.MILLISECONDS.sleep(1);
+//		} catch (InterruptedException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
 //		}
+		File tableDirectory = new File(directory, tableName);
+	    File fl = new File(tableDirectory, ""+columnName+".db");
+	    
+	    BitmapIndex res = null;
+	    try 
+		{
+			FileInputStream fin = new FileInputStream(fl);
+			ObjectInputStream ois = new ObjectInputStream(fin);
+			res = (BitmapIndex)ois.readObject();
+			ois.close();
+		} 
+		catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
+		}
 	    return res;
 	}
 	
