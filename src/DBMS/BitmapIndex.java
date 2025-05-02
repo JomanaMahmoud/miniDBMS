@@ -9,6 +9,7 @@ public class BitmapIndex implements Serializable {
     private String tableName;
     private String columnName;
     private HashMap<String, BitSet> BitMapIndex;
+
     public BitmapIndex(String tableName, String columnName) {
         this.tableName = tableName;
         this.columnName = columnName;
@@ -20,6 +21,10 @@ public class BitmapIndex implements Serializable {
 
     public String getColumnName() {
         return columnName;
+    }
+
+    public HashMap<String, BitSet> getBitMapIndex() {
+        return BitMapIndex;
     }
 
     public void createBitMapIndex(ArrayList<String[]> records, int colIndex){
@@ -34,6 +39,19 @@ public class BitmapIndex implements Serializable {
                 bitSet.set(i);
                 BitMapIndex.put(record[colIndex], bitSet);
             }
+        }
+    }
+
+    public void insertIntoBitMapIndex(String value, int insertionIndex){
+        if(BitMapIndex.containsKey(value)){
+            BitSet bitSet = BitMapIndex.get(value);
+            bitSet.set(insertionIndex);
+            BitMapIndex.put(value, bitSet);
+        }
+        else{
+            BitSet bitSet = new BitSet();
+            bitSet.set(insertionIndex);
+            BitMapIndex.put(value, bitSet);
         }
     }
 

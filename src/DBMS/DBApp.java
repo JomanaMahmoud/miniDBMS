@@ -20,6 +20,7 @@ public class DBApp {
 
 	// A map to store traces for each table.
 	private static Map<String, ArrayList<String>> tableTraces = new HashMap<>();
+	private static HashMap<String, ArrayList<String>> tableIndices = new HashMap<String, ArrayList<String>>();
 
 	// MILESTONE 1
 	/**
@@ -74,6 +75,21 @@ public class DBApp {
 		if (t != null) {
 			long startTime = System.nanoTime();  // Start time for execution time calculation
 			t.insert(record);
+
+			if(tableIndices.containsKey(tableName)) {
+				ArrayList<String> indices = tableIndices.get(tableName);
+				String[] colNames = t.getColumnNames();
+				String colName;
+				for (int i = 0; i < colNames.length; i++) {
+					colName = colNames[i];
+					if (indices != null && indices.contains(colName)) {
+						BitmapIndex b = FileManager.loadTableIndex(tableName, colName);
+						b.insertIntoBitMapIndex(record[i], t.getRecordsCount()-1);
+						FileManager.storeTableIndex(tableName,colName,b);
+					}
+				}
+			}
+
 			boolean storeTable = FileManager.storeTable(tableName, t);
 			if(!storeTable) {
 				System.err.println("Error: Table '" + tableName + "' could not be stored correctly.");
@@ -271,6 +287,18 @@ public class DBApp {
 			else {
 				BitmapIndex b = new BitmapIndex(tableName, colName);
 				b.createBitMapIndex(records,index);
+
+				if(tableIndices.containsKey(tableName)) {
+					ArrayList<String> indices = tableIndices.get(tableName);
+					indices.add(colName);
+					tableIndices.put(tableName, indices);
+				}
+				else {
+					ArrayList<String> newList = new ArrayList<>();
+					newList.add(colName);
+					tableIndices.put(tableName, newList);
+				}
+
 				boolean storeTable = FileManager.storeTableIndex(tableName,colName,b);
 				if (!storeTable)
 					System.err.println("Error: Table '" + tableName + "' could not be stored correctly.");
