@@ -247,7 +247,7 @@ public class DBApp {
 		}
 		else {
 			Table t = FileManager.loadTable(tableName);
-			trace.add("Pages Count: " + t.getPagesCount() + ", Records Count: " + t.getRecordsCount());
+			trace.add("Pages Count: " + t.getPagesCount() + ", Records Count: " + t.getRecordsCount() + ", Indexed Columns: " + tableIndices.values().toString());
 		}
 		return String.join("\n", trace);
 	}
@@ -285,6 +285,7 @@ public class DBApp {
 				System.err.println("Error: Column '" + colName + "' not found.");
 			}
 			else {
+				long startTime = System.nanoTime();
 				BitmapIndex b = new BitmapIndex(tableName, colName);
 				b.createBitMapIndex(records,index);
 
@@ -302,6 +303,11 @@ public class DBApp {
 				boolean storeTable = FileManager.storeTableIndex(tableName,colName,b);
 				if (!storeTable)
 					System.err.println("Error: Table '" + tableName + "' could not be stored correctly.");
+
+				long endTime = System.nanoTime();
+				long executionTime = (endTime - startTime) / 1000000;
+
+				tableTraces.get(tableName).add("Index created for column: " + colName + ", execution time (mil):" + executionTime);
 			}
 		}
 		else {
@@ -318,10 +324,23 @@ public class DBApp {
 		BitmapIndex b = FileManager.loadTableIndex(tableName,colName);
 		String result = null;
 		if (b != null)
-			result = b.getBitMapIndexByValue(value,t.getRecords().size());
+			result = b.getBitMapIndexByValue(value,t.getRecordsCount());
 		else
 			System.err.println("Error: Index for Column '" + colName + "' not found.");
 		return result;
+	}
+
+	public static ArrayList<String []> validateRecords(String tableName){
+		Table t = FileManager.loadTable(tableName);
+		ArrayList<String[]> resultRecords = new ArrayList<>();
+		for(Page page : t.getPages()){
+			if(FileManager.loadTablePage(tableName,page.getPageNumber())==null)
+			{
+                resultRecords.addAll(page.getRecords());
+            }
+		}
+		tableTraces.get(tableName).add("Validating records: " + resultRecords.size() + " records missing.");
+		return resultRecords;
 	}
 
 	public static void main(String[] args)throws IOException {
@@ -331,20 +350,11 @@ public class DBApp {
 		String[] r1 = {"1", "stud1", "CS", "5", "0.9"};
 		insert("student", r1);
 
-
-
 		String[] r2 = {"2", "stud2", "BI", "7", "1.2"};
 		insert("student", r2);
 
 		String[] r3 = {"3", "stud3", "CS", "2", "2.4"};
 		insert("student", r3);
-
-		createBitMapIndex("student", "gpa");
-		createBitMapIndex("student", "major");
-
-		System.out.println("Bitmap of the value of CS from the major index: "+getValueBits("student", "major", "CS"));
-		System.out.println("Bitmap of the value of 1.2 from the gpa index: "+getValueBits("student", "gpa", "1.2"));
-
 
 		String[] r4 = {"4", "stud4", "CS", "9", "1.2"};
 		insert("student", r4);
@@ -352,9 +362,28 @@ public class DBApp {
 		String[] r5 = {"5", "stud5", "BI", "4", "3.5"};
 		insert("student", r5);
 
-		System.out.println("After new insertions:");
-		System.out.println("Bitmap of the value of CS from the major index: "+getValueBits("student", "major", "CS"));
-		System.out.println("Bitmap of the value of 1.2 from the gpa index: "+getValueBits("student", "gpa", "1.2"));
+		//////// This is the code used to delete pages from the table
+		System.out.println("File Manager trace before deleting pages: "+FileManager.trace());
+
+		String path = FileManager.class.getResource("FileManager.class").toString();
+		File directory = new File(path.substring(6,path.length()-17) + File.separator + "Tables//student" + File.separator);
+		File[] contents = directory.listFiles();
+		int[] pageDel = {0,2};
+		for(int i=0;i<pageDel.length;i++)
+		{
+			contents[pageDel[i]].delete();
+		}
+////////End of deleting pages code
+		System.out.println("File Manager trace after deleting pages: "+FileManager.trace());
+		ArrayList<String[]> tr = validateRecords("student");
+		System.out.println("Missing records count: "+tr.size());
+
+		tr = validateRecords("student");
+		System.out.println("Missing record count: "+tr.size());
+		System.out.println("File Manager trace after recovering missing records: "+FileManager.trace());
+		System.out.println("--------------------------------");
+		System.out.println("Full trace of the table: ");
+		System.out.println(getFullTrace("student"));
 	}
 }
 

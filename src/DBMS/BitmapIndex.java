@@ -57,13 +57,10 @@ public class BitmapIndex implements Serializable {
 
     public String getBitMapIndexByValue(String value, int BitMapLength) {
         BitSet bitMap = BitMapIndex.get(value);
-        if (bitMap != null) {
+        if (bitMap != null)
             return  toBitString(bitMap, BitMapLength);
-        }
-        else{
-            System.out.println("Error: Value " + value + " not found in Column " + columnName + " in Table " + tableName);
-        }
-        return null;
+        else
+            return toZeroBitString(BitMapLength);
     }
 
     public static String toBitString(BitSet bitSet, int size) {
@@ -71,6 +68,13 @@ public class BitmapIndex implements Serializable {
         for (int i = 0; i < size; i++) {
             sb.append(bitSet.get(i) ? '1' : '0');
         }
+        return sb.toString();
+    }
+
+    public static String toZeroBitString(int size) {
+        StringBuilder sb = new StringBuilder(size);
+        for (int i = 0; i < size; i++)
+            sb.append('0');
         return sb.toString();
     }
 
