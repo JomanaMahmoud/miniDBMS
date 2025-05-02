@@ -1,7 +1,6 @@
 package DBMS;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,7 +21,7 @@ public class DBApp {
 	// A map to store traces for each table.
 	private static Map<String, ArrayList<String>> tableTraces = new HashMap<>();
 
-
+	// MILESTONE 1
 	/**
 	 * Creates a new table.
 	 *
@@ -75,8 +74,7 @@ public class DBApp {
 		if (t != null) {
 			long startTime = System.nanoTime();  // Start time for execution time calculation
 			t.insert(record);
-			boolean storeTable = false;
-			storeTable = FileManager.storeTable(tableName, t);
+			boolean storeTable = FileManager.storeTable(tableName, t);
 			if(!storeTable) {
 				System.err.println("Error: Table '" + tableName + "' could not be stored correctly.");
 			}
@@ -247,11 +245,88 @@ public class DBApp {
 		return trace.get(trace.size() - 1);
 	}
 
+	// MILESTONE 2
+	public static void createBitMapIndex(String tableName, String colName) {
+
+		if (tableName == null || colName == null) {
+			throw new IllegalArgumentException("Table name and record must not be null.");
+		}
+
+		Table t = FileManager.loadTable(tableName);
+		if (t != null) {
+			ArrayList<String[]> records = t.getRecords();
+			String[] colNames = t.getColumnNames();
+
+			int index = -1;
+			for (int i = 0;i<colNames.length;i++){
+				if (colNames[i].equals(colName)) {
+					index = i;
+					break;
+				}
+			}
+
+			if (index == -1) {
+				System.err.println("Error: Column '" + colName + "' not found.");
+			}
+			else {
+				BitmapIndex b = new BitmapIndex(tableName, colName);
+				b.createBitMapIndex(records,index);
+				boolean storeTable = FileManager.storeTableIndex(tableName,colName,b);
+				if (!storeTable)
+					System.err.println("Error: Table '" + tableName + "' could not be stored correctly.");
+			}
+		}
+		else {
+			System.err.println("Error: Table '" + tableName + "' not found.");
+		}
+	}
+
+	public static String getValueBits(String tableName, String colName, String value){
+		if (tableName == null || colName == null) {
+			throw new IllegalArgumentException("Table name and record must not be null.");
+		}
+
+		Table t = FileManager.loadTable(tableName);
+		BitmapIndex b = FileManager.loadTableIndex(tableName,colName);
+		String result = null;
+		if (b != null)
+			result = b.getBitMapIndexByValue(value,t.getRecords().size());
+		else
+			System.err.println("Error: Index for Column '" + colName + "' not found.");
+		return result;
+	}
 
 	public static void main(String[] args)throws IOException {
+		FileManager.reset();
+		String[] cols = {"id","name","major","semester","gpa"};
+		createTable("student", cols);
+		String[] r1 = {"1", "stud1", "CS", "5", "0.9"};
+		insert("student", r1);
 
-		String[] cols = {"id","name","major","semester","gpa"}; createTable("student", cols); String[] r1 = {"1", "stud1", "CS", "5", "0.9"}; insert("student", r1); String[] r2 = {"2", "stud2", "BI", "7", "1.2"}; insert("student", r2); String[] r3 = {"3", "stud3", "CS", "2", "2.4"}; insert("student", r3); String[] r4 = {"4", "stud4", "DMET", "9", "1.2"}; insert("student", r4); String[] r5 = {"5", "stud5", "BI", "4", "3.5"}; insert("student", r5); System.out.println("Output of selecting the whole table content:"); ArrayList<String[]> result1 = select("student"); for (String[] array : result1) { for (String str : array) { System.out.print(str + " "); } System.out.println(); } System.out.println("--------------------------------"); System.out.println("Output of selecting the output by position:"); ArrayList<String[]> result2 = select("student", 1, 1); for (String[] array : result2) { for (String str : array) { System.out.print(str + " "); } System.out.println(); } System.out.println("--------------------------------"); System.out.println("Output of selecting the output by column condition:"); ArrayList<String[]> result3 = select("student", new String[]{"gpa"}, new String[]{"1.2"}); for (String[] array : result3) {
-			for (String str : array) { System.out.print(str + " "); } System.out.println(); } System.out.println("--------------------------------"); System.out.println("Full Trace of the table:"); System.out.println(getFullTrace("student")); System.out.println("--------------------------------"); System.out.println("Last Trace of the table:"); System.out.println(getLastTrace("student")); System.out.println("--------------------------------"); System.out.println("The trace of the Tables Folder:"); System.out.println(FileManager.trace()); FileManager.reset(); System.out.println("--------------------------------"); System.out.println("The trace of the Tables Folder after resetting:"); System.out.println(FileManager.trace());
+
+
+		String[] r2 = {"2", "stud2", "BI", "7", "1.2"};
+		insert("student", r2);
+
+		String[] r3 = {"3", "stud3", "CS", "2", "2.4"};
+		insert("student", r3);
+
+		createBitMapIndex("student", "gpa");
+		createBitMapIndex("student", "major");
+
+		System.out.println("Bitmap of the value of CS from the major index: "+getValueBits("student", "major", "CS"));
+		System.out.println("Bitmap of the value of 1.2 from the gpa index: "+getValueBits("student", "gpa", "1.2"));
+
+
+		String[] r4 = {"4", "stud4", "CS", "9", "1.2"};
+		insert("student", r4);
+
+		String[] r5 = {"5", "stud5", "BI", "4", "3.5"};
+		insert("student", r5);
+
+		System.out.println("After new insertions:");
+		System.out.println("Bitmap of the value of CS from the major index: "+getValueBits("student", "major", "CS"));
+		System.out.println("Bitmap of the value of 1.2 from the gpa index: "+getValueBits("student", "gpa", "1.2"));
 	}
 }
 
