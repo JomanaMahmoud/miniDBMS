@@ -13,6 +13,7 @@ import java.util.HashMap;
 public class BitmapIndex implements Serializable {
     private String tableName;
     private String columnName;
+    private int columnSize;
     private HashMap<String, BitSet> BitMapIndex;
 
     /**
@@ -21,9 +22,10 @@ public class BitmapIndex implements Serializable {
      * @param tableName  the name of the table
      * @param columnName the name of the column to index
      * */
-    public BitmapIndex(String tableName, String columnName) {
+    public BitmapIndex(String tableName, String columnName, int columnSize) {
         this.tableName = tableName;
         this.columnName = columnName;
+        this.columnSize = columnSize;
     }
 
     /**
@@ -95,6 +97,7 @@ public class BitmapIndex implements Serializable {
             bitSet.set(insertionIndex);
             BitMapIndex.put(value, bitSet);
         }
+        columnSize++;
     }
 
     /**
@@ -104,12 +107,12 @@ public class BitmapIndex implements Serializable {
      * @param BitMapLength  the expected length of the bitmap string
      * @return a binary string (e.g., "0100") representing the positions of the value
      */
-    public String getBitMapIndexByValue(String value, int BitMapLength) {
+    public String getBitMapIndexByValue(String value) {
         BitSet bitMap = BitMapIndex.get(value);
         if (bitMap != null)
-            return  toBitString(bitMap, BitMapLength);
+            return  toBitString(bitMap, columnSize);
         else
-            return toZeroBitString(BitMapLength);
+            return toZeroBitString(columnSize);
     }
 
     /**
