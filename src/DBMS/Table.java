@@ -104,4 +104,40 @@ public class Table implements Serializable
 		}
 		return numberOfRecords;
 	}
+	public int getColumnIndex(String colName) {
+		// Iterate through the array of column names
+		for (int i = 0; i < this.columnNames.length; i++) {
+			// Compare the input column name with the current column name in the array
+			if (this.columnNames[i].equals(colName)) {
+				// If names match, return the current index 'i'
+				return i;
+			}
+		}
+		// If the loop finishes without finding a match, the column name is invalid
+		// Throw an exception to indicate that the column does not exist in this table
+		throw new IllegalArgumentException("Column '" + colName + "' not found in table '" + tableName + "'.");
+	}
+	public String[] getRecordByGlobalIndex(int globalRecordIndex) {
+		// Calculate which page this record is on
+		int pageNumber = globalRecordIndex / this.pageSize;
+
+		// Calculate the index of the record within that page
+		int recordIndexInPage = globalRecordIndex % this.pageSize;
+
+		// Use the FileManager to load the specific page from disk
+		Page page = FileManager.loadTablePage(this.tableName, pageNumber);
+
+		if (page != null) {
+			// Check if the record index is valid for the records currently in this page
+			if (recordIndexInPage < page.getRecords().size()) {
+				return page.getRecord(recordIndexInPage);
+			}
+
+		}
+
+		// If the page was null or the record index was invalid in that page
+		System.err.println("Warning: Could not retrieve record with global index " + globalRecordIndex +
+				". Calculated page: " + pageNumber + ", index in page: " + recordIndexInPage);
+		return null; // Indicate record not found or could not be loaded
+	}
 }
