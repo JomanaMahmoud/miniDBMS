@@ -263,6 +263,18 @@ public class DBApp {
 	}
 
 	// MILESTONE 2
+	/**
+	 * Creates a bitmap index for a specific column in a given table.
+	 * <p>
+	 * The method first loads the table, identifies the index of the specified column,
+	 * and then creates a bitmap index for that column. The index is stored in memory
+	 * and persisted using the FileManager. It also logs the time taken to create the index
+	 * and stores the column in the table's index registry.
+	 *
+	 * @param tableName the name of the table for which to create the bitmap index.
+	 * @param colName   the name of the column to index.
+	 * @throws IllegalArgumentException if either {@code tableName} or {@code colName} is {@code null}.
+	 */
 	public static void createBitMapIndex(String tableName, String colName) {
 
 		if (tableName == null || colName == null) {
@@ -316,6 +328,19 @@ public class DBApp {
 		}
 	}
 
+
+	/**
+	 * Retrieves the bitmap representation of a specific value in a column for a given table.
+	 * <p>
+	 * The method loads the table and the corresponding bitmap index, then queries the bitmap
+	 * to return the bit pattern associated with the specified value.
+	 *
+	 * @param tableName the name of the table.
+	 * @param colName   the column from which the value's bitmap is requested.
+	 * @param value     the value to look up in the bitmap index.
+	 * @return a string representing the bitmap of the value, or {@code null} if the index is not found.
+	 * @throws IllegalArgumentException if either {@code tableName} or {@code colName} is {@code null}.
+	 */
 	public static String getValueBits(String tableName, String colName, String value){
 		if (tableName == null || colName == null) {
 			throw new IllegalArgumentException("Table name and record must not be null.");
@@ -331,6 +356,15 @@ public class DBApp {
 		return result;
 	}
 
+	/**
+	 * Validates records of a table by checking if the corresponding pages exist.
+	 * <p>
+	 * This method identifies records from pages that are missing on disk and returns them.
+	 * It also logs the number of records found to be missing from the file system.
+	 *
+	 * @param tableName the name of the table to validate.
+	 * @return a list of string arrays, each representing a missing record.
+	 */
 	public static ArrayList<String []> validateRecords(String tableName){
 		Table t = FileManager.loadTable(tableName);
 		ArrayList<String[]> resultRecords = new ArrayList<>();
