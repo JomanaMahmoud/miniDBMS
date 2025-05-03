@@ -247,7 +247,8 @@ public class DBApp {
 		}
 		else {
 			Table t = FileManager.loadTable(tableName);
-			trace.add("Pages Count: " + t.getPagesCount() + ", Records Count: " + t.getRecordsCount() + ", Indexed Columns: " + tableIndices.values().toString());
+			List<String> indexedCols = tableIndices.getOrDefault(tableName, new ArrayList<>());
+			trace.add("Pages Count: " + t.getPagesCount() + ", Records Count: " + t.getRecordsCount() + ", Indexed Columns: " + indexedCols.toString());
 		}
 		return String.join("\n", trace);
 	}
