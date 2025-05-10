@@ -832,8 +832,15 @@ public class DBApp {
 
 
 	private static ArrayList<String[]> selectCase4_NoIndexedColumns(Table table, String[] cols, String[] vals) {
-
+		long startTime = System.nanoTime();
 		ArrayList<String[]> result = select(table.getTableName(), cols, vals);
+		long endTime = System.nanoTime();
+		long executionTime = (endTime - startTime) / 1000000;
+
+		tableTraces.get(table.getTableName()).add("Select index condition: " + Arrays.toString(cols) + "->" + Arrays.toString(vals) +
+				", Non Indexed: " + Arrays.toString(cols) +
+				", Final count: " + result.size() +
+				", execution time (mil):" + executionTime);
 		return result;
 	}
 

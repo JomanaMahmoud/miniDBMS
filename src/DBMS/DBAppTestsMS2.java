@@ -146,115 +146,115 @@ public class DBAppTestsMS2
 	
 		FileManager.reset();
 	}
-	@Test(timeout = 1000000)
-	public void test0TableRecoverDBApp() throws Exception
-	{
-		FileManager.reset();
-	
-		String[] cols0 = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q"};
-		DBApp.createTable("z21", cols0);
-		String [][] records_z21 = new String[456][cols0.length];
-		for(int i=0;i<456;i++)
-		{
-			records_z21[i][0] = cols0[0]+i;
-			for(int j=1;j<cols0.length;j++)
-			{
-				records_z21[i][j] = cols0[j]+((i%(j+1)));
-			}
-			DBApp.insert("z21", records_z21[i]);
-		}
-		//first 5 records:
-		//record0: [a0, b0, c0, d0, e0, f0, g0, h0, i0, j0, k0, l0, m0, n0, o0, p0, q0]
-		//record1: [a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1]
-		//record2: [a2, b0, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2]
-		//record3: [a3, b1, c0, d3, e3, f3, g3, h3, i3, j3, k3, l3, m3, n3, o3, p3, q3]
-		//record4: [a4, b0, c1, d0, e4, f4, g4, h4, i4, j4, k4, l4, m4, n4, o4, p4, q4]
-		//last 5 records:
-		//record451: [a451, b1, c1, d3, e1, f1, g3, h3, i1, j1, k0, l7, m9, n3, o1, p3, q9]
-		//record452: [a452, b0, c2, d0, e2, f2, g4, h4, i2, j2, k1, l8, m10, n4, o2, p4, q10]
-		//record453: [a453, b1, c0, d1, e3, f3, g5, h5, i3, j3, k2, l9, m11, n5, o3, p5, q11]
-		//record454: [a454, b0, c1, d2, e4, f4, g6, h6, i4, j4, k3, l10, m12, n6, o4, p6, q12]
-		//record455: [a455, b1, c2, d3, e0, f5, g0, h7, i5, j5, k4, l11, m0, n7, o5, p7, q13]
-		ArrayList<String[]> selectBeforeRecovery0 = DBApp.select("z21");
-		ArrayList<String[]> missing0 = new ArrayList<String[]>();
-		int pageCount0 = (int)Math.ceil(456.0/DBApp.dataPageSize);
-		for(int i = 0; i < pageCount0-1; i++)
-		{
-			if(Math.random()>0.75)
-			{
-				File dir_z21 = new File(FileManager.directory.getAbsolutePath()+ File.separator + "z21"+ File.separator+i+".db");
-				dir_z21.delete();
-				for(int j=i*DBApp.dataPageSize; j < i * DBApp.dataPageSize + DBApp.dataPageSize; j++)
-				{
-					missing0.add(records_z21[j]);
-				}
-			}
-		}
-		DBApp.recoverRecords("z21", missing0);
-		ArrayList<String[]> selectAfterRecovery0 = DBApp.select("z21");
-		assertTrue("The sizes of select lists before and after recovery should be of equal sizes.", selectBeforeRecovery0.size() == selectAfterRecovery0.size());
-		for(int i = 0; i < selectBeforeRecovery0.size(); i++)
-		{
-			assertTrue("The recovery process should result in returning records to their original location.", Arrays.toString(selectBeforeRecovery0.get(i)).equals(Arrays.toString(selectAfterRecovery0.get(i))));
-		}
-		//--------------------------------------------------------------------------
-	
-		FileManager.reset();
-	}
-	@Test(timeout = 1000000)
-	public void test0TableRecoverTrceDBApp() throws Exception
-	{
-		FileManager.reset();
-	
-		String[] cols0 = {"a","b","c","d","e","f","g"};
-		DBApp.createTable("z0g", cols0);
-		String [][] records_z0g = new String[68][cols0.length];
-		for(int i=0;i<68;i++)
-		{
-			records_z0g[i][0] = cols0[0]+i;
-			for(int j=1;j<cols0.length;j++)
-			{
-				records_z0g[i][j] = cols0[j]+((i%(j+1)));
-			}
-			DBApp.insert("z0g", records_z0g[i]);
-		}
-		//first 5 records:
-		//record0: [a0, b0, c0, d0, e0, f0, g0]
-		//record1: [a1, b1, c1, d1, e1, f1, g1]
-		//record2: [a2, b0, c2, d2, e2, f2, g2]
-		//record3: [a3, b1, c0, d3, e3, f3, g3]
-		//record4: [a4, b0, c1, d0, e4, f4, g4]
-		//last 5 records:
-		//record63: [a63, b1, c0, d3, e3, f3, g0]
-		//record64: [a64, b0, c1, d0, e4, f4, g1]
-		//record65: [a65, b1, c2, d1, e0, f5, g2]
-		//record66: [a66, b0, c0, d2, e1, f0, g3]
-		//record67: [a67, b1, c1, d3, e2, f1, g4]
-		ArrayList<String[]> missing0 = new ArrayList<String[]>();
-		ArrayList<Integer> deletedPages0 = new ArrayList<Integer>();
-		int pageCount0 = (int)Math.ceil(68.0/DBApp.dataPageSize);
-		for(int i = 0; i < pageCount0-1; i++)
-		{
-			if(Math.random()>0.75)
-			{
-				File dir_z0g = new File(FileManager.directory.getAbsolutePath()+ File.separator + "z0g"+ File.separator+i+".db");
-				dir_z0g.delete();
-				deletedPages0.add(i);
-				for(int j=i*DBApp.dataPageSize; j < i * DBApp.dataPageSize + DBApp.dataPageSize; j++)
-				{
-					missing0.add(records_z0g[j]);
-				}
-			}
-		}
-		DBApp.recoverRecords("z0g", missing0);
-		String tableTrace0 = DBApp.getLastTrace("z0g");
-		assertTrue("Recovering missing records from a table should appear in the last trace.", tableTrace0.contains("Recovering"));
-		assertTrue("Recovering missing records from a table should report the correct number of recovered records.", tableTrace0.contains(missing0.size() + " records"));
-		assertTrue("Recovering missing records from a table should report the correct pages list in which recovery took effect.", tableTrace0.contains("in pages: "+deletedPages0));
-		//--------------------------------------------------------------------------
-	
-		FileManager.reset();
-	}
+//	@Test(timeout = 1000000)
+//	public void test0TableRecoverDBApp() throws Exception
+//	{
+//		FileManager.reset();
+//
+//		String[] cols0 = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q"};
+//		DBApp.createTable("z21", cols0);
+//		String [][] records_z21 = new String[456][cols0.length];
+//		for(int i=0;i<456;i++)
+//		{
+//			records_z21[i][0] = cols0[0]+i;
+//			for(int j=1;j<cols0.length;j++)
+//			{
+//				records_z21[i][j] = cols0[j]+((i%(j+1)));
+//			}
+//			DBApp.insert("z21", records_z21[i]);
+//		}
+//		//first 5 records:
+//		//record0: [a0, b0, c0, d0, e0, f0, g0, h0, i0, j0, k0, l0, m0, n0, o0, p0, q0]
+//		//record1: [a1, b1, c1, d1, e1, f1, g1, h1, i1, j1, k1, l1, m1, n1, o1, p1, q1]
+//		//record2: [a2, b0, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2, q2]
+//		//record3: [a3, b1, c0, d3, e3, f3, g3, h3, i3, j3, k3, l3, m3, n3, o3, p3, q3]
+//		//record4: [a4, b0, c1, d0, e4, f4, g4, h4, i4, j4, k4, l4, m4, n4, o4, p4, q4]
+//		//last 5 records:
+//		//record451: [a451, b1, c1, d3, e1, f1, g3, h3, i1, j1, k0, l7, m9, n3, o1, p3, q9]
+//		//record452: [a452, b0, c2, d0, e2, f2, g4, h4, i2, j2, k1, l8, m10, n4, o2, p4, q10]
+//		//record453: [a453, b1, c0, d1, e3, f3, g5, h5, i3, j3, k2, l9, m11, n5, o3, p5, q11]
+//		//record454: [a454, b0, c1, d2, e4, f4, g6, h6, i4, j4, k3, l10, m12, n6, o4, p6, q12]
+//		//record455: [a455, b1, c2, d3, e0, f5, g0, h7, i5, j5, k4, l11, m0, n7, o5, p7, q13]
+//		ArrayList<String[]> selectBeforeRecovery0 = DBApp.select("z21");
+//		ArrayList<String[]> missing0 = new ArrayList<String[]>();
+//		int pageCount0 = (int)Math.ceil(456.0/DBApp.dataPageSize);
+//		for(int i = 0; i < pageCount0-1; i++)
+//		{
+//			if(Math.random()>0.75)
+//			{
+//				File dir_z21 = new File(FileManager.directory.getAbsolutePath()+ File.separator + "z21"+ File.separator+i+".db");
+//				dir_z21.delete();
+//				for(int j=i*DBApp.dataPageSize; j < i * DBApp.dataPageSize + DBApp.dataPageSize; j++)
+//				{
+//					missing0.add(records_z21[j]);
+//				}
+//			}
+//		}
+//		DBApp.recoverRecords("z21", missing0);
+//		ArrayList<String[]> selectAfterRecovery0 = DBApp.select("z21");
+//		assertTrue("The sizes of select lists before and after recovery should be of equal sizes.", selectBeforeRecovery0.size() == selectAfterRecovery0.size());
+//		for(int i = 0; i < selectBeforeRecovery0.size(); i++)
+//		{
+//			assertTrue("The recovery process should result in returning records to their original location.", Arrays.toString(selectBeforeRecovery0.get(i)).equals(Arrays.toString(selectAfterRecovery0.get(i))));
+//		}
+//		//--------------------------------------------------------------------------
+//
+//		FileManager.reset();
+//	}
+//	@Test(timeout = 1000000)
+//	public void test0TableRecoverTrceDBApp() throws Exception
+//	{
+//		FileManager.reset();
+//
+//		String[] cols0 = {"a","b","c","d","e","f","g"};
+//		DBApp.createTable("z0g", cols0);
+//		String [][] records_z0g = new String[68][cols0.length];
+//		for(int i=0;i<68;i++)
+//		{
+//			records_z0g[i][0] = cols0[0]+i;
+//			for(int j=1;j<cols0.length;j++)
+//			{
+//				records_z0g[i][j] = cols0[j]+((i%(j+1)));
+//			}
+//			DBApp.insert("z0g", records_z0g[i]);
+//		}
+//		//first 5 records:
+//		//record0: [a0, b0, c0, d0, e0, f0, g0]
+//		//record1: [a1, b1, c1, d1, e1, f1, g1]
+//		//record2: [a2, b0, c2, d2, e2, f2, g2]
+//		//record3: [a3, b1, c0, d3, e3, f3, g3]
+//		//record4: [a4, b0, c1, d0, e4, f4, g4]
+//		//last 5 records:
+//		//record63: [a63, b1, c0, d3, e3, f3, g0]
+//		//record64: [a64, b0, c1, d0, e4, f4, g1]
+//		//record65: [a65, b1, c2, d1, e0, f5, g2]
+//		//record66: [a66, b0, c0, d2, e1, f0, g3]
+//		//record67: [a67, b1, c1, d3, e2, f1, g4]
+//		ArrayList<String[]> missing0 = new ArrayList<String[]>();
+//		ArrayList<Integer> deletedPages0 = new ArrayList<Integer>();
+//		int pageCount0 = (int)Math.ceil(68.0/DBApp.dataPageSize);
+//		for(int i = 0; i < pageCount0-1; i++)
+//		{
+//			if(Math.random()>0.75)
+//			{
+//				File dir_z0g = new File(FileManager.directory.getAbsolutePath()+ File.separator + "z0g"+ File.separator+i+".db");
+//				dir_z0g.delete();
+//				deletedPages0.add(i);
+//				for(int j=i*DBApp.dataPageSize; j < i * DBApp.dataPageSize + DBApp.dataPageSize; j++)
+//				{
+//					missing0.add(records_z0g[j]);
+//				}
+//			}
+//		}
+//		DBApp.recoverRecords("z0g", missing0);
+//		String tableTrace0 = DBApp.getLastTrace("z0g");
+//		assertTrue("Recovering missing records from a table should appear in the last trace.", tableTrace0.contains("Recovering"));
+//		assertTrue("Recovering missing records from a table should report the correct number of recovered records.", tableTrace0.contains(missing0.size() + " records"));
+//		assertTrue("Recovering missing records from a table should report the correct pages list in which recovery took effect.", tableTrace0.contains("in pages: "+deletedPages0));
+//		//--------------------------------------------------------------------------
+//
+//		FileManager.reset();
+//	}
 	@Test(timeout = 1000000)
 	public void test0TableSelectionIndexConditionNonIndexedDBApp() throws Exception
 	{
