@@ -55,10 +55,21 @@ public class Page implements Serializable
         records.add(record);
     }
 
+    /**
+     * Retrieves all records stored in the page.
+     *
+     * @return An ArrayList containing all records in this page.
+     */
     public ArrayList<String[]> getRecords() {
         return records;  // Assuming records is an ArrayList<String[]>
     }
 
+    /**
+     * Retrieves a specific record by its index within the page.
+     *
+     * @param recordIndex The index of the record to retrieve.
+     * @return The record as a String array, or null if the index is out of bounds.
+     */
     public String[] getRecord(int recordIndex) {
         if (recordIndex >= 0 && recordIndex < records.size()) {
             return records.get(recordIndex);
@@ -67,5 +78,10 @@ public class Page implements Serializable
         }
     }
 
+    /**
+     * Gets the number of records currently stored in the page.
+     *
+     * @return The count of records in this page.
+     */
     public int getRecordsCount() { return records.size(); }
 }

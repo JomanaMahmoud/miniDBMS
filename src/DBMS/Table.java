@@ -68,6 +68,12 @@ public class Table implements Serializable
 		if(!storeTablePage)
 			System.err.println("Error: Table '" + tableName + "' could not be stored correctly.");
 	}
+
+	/**
+	 * Retrieves all records stored in the table across all pages.
+	 *
+	 * @return An ArrayList of all records in the table.
+	 */
 	public ArrayList<String[]> getRecords() {
 		ArrayList<String[]> allRecords = new ArrayList<>();
 
@@ -78,10 +84,21 @@ public class Table implements Serializable
 		return allRecords;
 	}
 
+	/**
+	 * Returns the array of column names for the table.
+	 *
+	 * @return An array of column names.
+	 */
 	public String[] getColumnNames() {
 		return columnNames;
 	}
 
+	/**
+	 * Retrieves a specific page by its page number.
+	 *
+	 * @param pageNumber The index of the page to retrieve.
+	 * @return The Page object if it exists, otherwise null.
+	 */
 	public Page getPage(int pageNumber) {
 		if (pageNumber >= 0 && pageNumber < pages.size()) {
 			return pages.get(pageNumber);
@@ -90,13 +107,27 @@ public class Table implements Serializable
 		}
 	}
 
-
+	/**
+	 * Retrieves the list of pages in the table.
+	 *
+	 * @return An ArrayList of Page objects.
+	 */
 	public ArrayList<Page> getPages() {
 		return pages;  // Returns the internal list of pages
 	}
 
+	/**
+	 * Gets the total number of pages in the table.
+	 *
+	 * @return The number of pages.
+	 */
 	public int getPagesCount() { return pages.size(); }
 
+	/**
+	 * Gets the total number of records in the table.
+	 *
+	 * @return The number of records across all pages.
+	 */
 	public int getRecordsCount() {
 		int numberOfRecords = 0;
 		for (Page page : pages) {
@@ -104,19 +135,30 @@ public class Table implements Serializable
 		}
 		return numberOfRecords;
 	}
+
+	/**
+	 * Retrieves the index of a given column name in the table.
+	 *
+	 * @param colName The name of the column to find.
+	 * @return The index of the specified column.
+	 * @throws IllegalArgumentException if the column does not exist.
+	 */
 	public int getColumnIndex(String colName) {
-		// Iterate through the array of column names
 		for (int i = 0; i < this.columnNames.length; i++) {
-			// Compare the input column name with the current column name in the array
 			if (this.columnNames[i].equals(colName)) {
-				// If names match, return the current index 'i'
 				return i;
 			}
 		}
-		// If the loop finishes without finding a match, the column name is invalid
-		// Throw an exception to indicate that the column does not exist in this table
+
 		throw new IllegalArgumentException("Column '" + colName + "' not found in table '" + tableName + "'.");
 	}
+
+	/**
+	 * Retrieves a record from the table based on its global index (across all pages).
+	 *
+	 * @param globalRecordIndex The global index of the record.
+	 * @return The record as a String array, or null if not found.
+	 */
 	public String[] getRecordByGlobalIndex(int globalRecordIndex) {
 		// Calculate which page this record is on
 		int pageNumber = globalRecordIndex / this.pageSize;
