@@ -67,8 +67,12 @@ public class DBApp {
 	 * @param record    An array of values representing the record.
 	 */
 	public static void insert(String tableName, String[] record) {
-		if (tableName == null || record == null) {
-			throw new IllegalArgumentException("Table name and record must not be null.");
+		if (tableName == null || tableName == "" || tableName == " ") {
+			throw new IllegalArgumentException("Table name cannot be null or empty.");
+		}
+
+		if (record == null || record.length == 0) {
+			throw new IllegalArgumentException("Record cannot be null or empty.");
 		}
 
 		Table t = FileManager.loadTable(tableName);
@@ -108,6 +112,10 @@ public class DBApp {
 	}
 
 	public static ArrayList<String[]> select(String tableName) {
+		if(tableName == null || tableName == "" || tableName == " ") {
+			throw new IllegalArgumentException("Table name cannot be null or empty.");
+		}
+
 		long startTime = System.nanoTime();  // Start time for execution time calculation
 
 		Table t = FileManager.loadTable(tableName);
@@ -125,6 +133,10 @@ public class DBApp {
 	}
 
 	public static ArrayList<String[]> select(String tableName, int pageNumber, int recordNumber) {
+		if(tableName == null || tableName == "" || tableName == " ") {
+			throw new IllegalArgumentException("Table name cannot be null or empty.");
+		}
+
 		long startTime = System.nanoTime();  // Start time for execution time calculation
 
 
@@ -159,6 +171,10 @@ public class DBApp {
 
 
 	public static ArrayList<String[]> select(String tableName, String[] cols, String[] vals) {
+		if(tableName == null || tableName == "" || tableName == " ") {
+			throw new IllegalArgumentException("Table name cannot be null or empty.");
+		}
+
 		long startTime = System.nanoTime();
 		Table t = FileManager.loadTable(tableName);
 
@@ -240,6 +256,9 @@ public class DBApp {
 	}
 
 	public static String getFullTrace(String tableName) {
+		if(tableName == null || tableName == "" || tableName == " ") {
+			throw new IllegalArgumentException("Table name cannot be null or empty.");
+		}
 
 		ArrayList<String> trace = tableTraces.get(tableName);
 		if (trace == null) {
@@ -254,6 +273,9 @@ public class DBApp {
 	}
 
 	public static String getLastTrace(String tableName) {
+		if(tableName == null || tableName == "" || tableName == " ") {
+			throw new IllegalArgumentException("Table name cannot be null or empty.");
+		}
 
 		ArrayList<String> trace = tableTraces.get(tableName);
 		if (trace == null || trace.isEmpty()) {
@@ -276,9 +298,12 @@ public class DBApp {
 	 * @throws IllegalArgumentException if either {@code tableName} or {@code colName} is {@code null}.
 	 */
 	public static void createBitMapIndex(String tableName, String colName) {
+		if (tableName == null || tableName == "" || tableName == " ") {
+			throw new IllegalArgumentException("Table name cannot be null or empty.");
+		}
 
-		if (tableName == null || colName == null) {
-			throw new IllegalArgumentException("Table name and record must not be null.");
+		if(colName == null || colName == "" || colName == " ") {
+			throw new IllegalArgumentException("Column name cannot be null or empty.");
 		}
 
 		Table t = FileManager.loadTable(tableName);
@@ -299,7 +324,7 @@ public class DBApp {
 			}
 			else {
 				long startTime = System.nanoTime();
-				BitmapIndex b = new BitmapIndex(tableName, colName);
+				BitmapIndex b = new BitmapIndex(tableName, colName,t.getRecordsCount());
 				b.createBitMapIndex(records,index);
 
 				if(tableIndices.containsKey(tableName)) {
@@ -342,15 +367,22 @@ public class DBApp {
 	 * @throws IllegalArgumentException if either {@code tableName} or {@code colName} is {@code null}.
 	 */
 	public static String getValueBits(String tableName, String colName, String value){
-		if (tableName == null || colName == null) {
-			throw new IllegalArgumentException("Table name and record must not be null.");
+		if (tableName == null || tableName == "" || tableName == " ") {
+			throw new IllegalArgumentException("Table name cannot be null or empty.");
 		}
 
-		Table t = FileManager.loadTable(tableName);
+		if(colName == null || colName == "" || colName == " ") {
+			throw new IllegalArgumentException("Column name cannot be null or empty.");
+		}
+
+		if(value == null || value == "" || value == " ") {
+			throw new IllegalArgumentException("Value cannot be null or empty.");
+		}
+
 		BitmapIndex b = FileManager.loadTableIndex(tableName,colName);
 		String result = null;
 		if (b != null)
-			result = b.getBitMapIndexByValue(value,t.getRecordsCount());
+			result = b.getBitMapIndexByValue(value);
 		else
 			System.err.println("Error: Index for Column '" + colName + "' not found.");
 		return result;
@@ -366,6 +398,10 @@ public class DBApp {
 	 * @return a list of string arrays, each representing a missing record.
 	 */
 	public static ArrayList<String []> validateRecords(String tableName){
+		if(tableName == null || tableName == "" || tableName == " ") {
+			throw new IllegalArgumentException("Table name cannot be null or empty.");
+		}
+
 		Table t = FileManager.loadTable(tableName);
 		ArrayList<String[]> resultRecords = new ArrayList<>();
 		for(Page page : t.getPages()){
