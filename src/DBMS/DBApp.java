@@ -262,7 +262,7 @@ public class DBApp {
 			throw new IllegalArgumentException("Table name cannot be null or empty.");
 		}
 
-		ArrayList<String> trace = tableTraces.get(tableName);
+		ArrayList<String> trace = (ArrayList<String>) tableTraces.get(tableName).clone();
 		if (trace == null) {
 			return "No traces found for table " + tableName;
 		}
@@ -417,12 +417,17 @@ public class DBApp {
 		return resultRecords;
 	}
 
-	public static void recoverRecords(String tableName, ArrayList<String[]> missing) throws Exception {
-		if(tableName == null || tableName.equals("") || tableName.equals(" ")) {
-			throw new IllegalArgumentException("Table name cannot be null or empty.");
-		}
+	public static void recoverRecords(String tableName, ArrayList<String[]> missing){
+//		if(tableName == null || tableName.equals("") || tableName.equals(" ")) {
+//			throw new IllegalArgumentException("Table name cannot be null or empty.");
+//		}
+//
+//		if(missing == null || missing.isEmpty()) return;
 
-		if(missing == null || missing.isEmpty()) return;
+		// Ensure the trace exists
+		if(!tableTraces.containsKey(tableName)) {
+			tableTraces.put(tableName, new ArrayList<>());
+		}
 
 		Table t = FileManager.loadTable(tableName);
 		ArrayList<Integer> missingPages = new ArrayList<Integer>();
@@ -431,15 +436,12 @@ public class DBApp {
 			if(FileManager.loadTablePage(tableName,pageNumber)==null)
 			{
 				missingPages.add(pageNumber);
-
 				FileManager.storeTablePage(tableName,pageNumber,page);
 			}
 		}
 
 		// Update the trace
-		ArrayList<String> tableTrace = tableTraces.get(tableName);
-		tableTrace.add("Recovering " + missing.size() + " records in pages: " + missingPages.toString() +".");
-		tableTraces.put(tableName, tableTrace);
+		tableTraces.get(tableName).add("Recovering " + missing.size() + " records in pages: " + missingPages.toString() +".");
 	}
 
 	public static ArrayList<String[]> selectIndex(String tableName, String[] cols, String[] vals) { // Removed throws DBAppException
@@ -928,112 +930,6 @@ public class DBApp {
 	}
 
 	public static void main(String[] args) throws IOException {
-		// Reset the FileManager state
-		FileManager.reset();
 
-		// Define the columns for the "student" table
-		String[] cols = {"id", "name", "major", "semester", "gpa"};
-
-		// Create the "student" table
-		createTable("student", cols);
-
-		// Insert sample records into the "student" table
-		String[] r1 = {"1", "stud1", "CS", "5", "0.9"};
-		insert("student", r1);
-		String[] r2 = {"2", "stud2", "BI", "7", "1.2"};
-		insert("student", r2);
-		String[] r3 = {"3", "stud3", "CS", "2", "2.4"};
-		insert("student", r3);
-
-		// Create bitmap indices on "gpa" and "major" columns
-		createBitMapIndex("student", "gpa");
-		createBitMapIndex("student", "major");
-
-		// Print bitmap values for the "major" and "gpa" columns
-		System.out.println("Bitmap of the value of CS from the major index: " + getValueBits("student", "major", "CS"));
-		System.out.println("Bitmap of the value of 1.2 from the gpa index: " + getValueBits("student", "gpa", "1.2"));
-
-		// Insert more records
-		String[] r4 = {"4", "stud4", "CS", "9", "1.2"};
-		insert("student", r4);
-		String[] r5 = {"5", "stud5", "BI", "4", "3.5"};
-		insert("student", r5);
-
-		// Print updated bitmap values after new insertions
-		System.out.println("After new insertions:");
-		System.out.println("Bitmap of the value of CS from the major index: " + getValueBits("student", "major", "CS"));
-		System.out.println("Bitmap of the value of 1.2 from the gpa index: " + getValueBits("student", "gpa", "1.2"));
-
-		// Selection with index when all columns are indexed
-		System.out.println("Output of selection using index when all columns of the select conditions are indexed:");
-		ArrayList<String[]> result1 = selectIndex("student", new String[]{"major", "gpa"}, new String[]{"CS", "1.2"});
-		for (String[] array : result1) {
-			for (String str : array) {
-				System.out.print(str + " ");
-			}
-			System.out.println();
-		}
-		System.out.println("Last trace of the table: " + getLastTrace("student"));
-		System.out.println("--------------------------------");
-
-		// Selection with index when only one column is indexed
-		System.out.println("Output of selection using index when only one column of the select conditions are indexed:");
-		ArrayList<String[]> result2 = selectIndex("student", new String[]{"major", "semester"}, new String[]{"CS", "5"});
-		for (String[] array : result2) {
-			for (String str : array) {
-				System.out.print(str + " ");
-			}
-			System.out.println();
-		}
-		System.out.println("Last trace of the table: " + getLastTrace("student"));
-		System.out.println("--------------------------------");
-
-		// Selection with index when some of the columns are indexed
-		System.out.println("Output of selection using index when some of the columns of the select conditions are indexed:");
-		ArrayList<String[]> result3 = selectIndex("student", new String[]{"major", "semester", "gpa"}, new String[]{"CS", "5", "0.9"});
-		for (String[] array : result3) {
-			for (String str : array) {
-				System.out.print(str + " ");
-			}
-			System.out.println();
-		}
-		System.out.println("Last trace of the table: " + getLastTrace("student"));
-		System.out.println("--------------------------------");
-
-		// Full trace of the table
-		System.out.println("Full Trace of the table:");
-		System.out.println(getFullTrace("student"));
-		System.out.println("--------------------------------");
-
-		// Trace of the Tables folder
-		System.out.println("The trace of the Tables Folder:");
-		System.out.println(FileManager.trace());
-
-		// Delete pages (this part simulates the file deletion from your initial code)
-		System.out.println("File Manager trace before deleting pages: " + FileManager.trace());
-
-		String path = FileManager.class.getResource("FileManager.class").toString();
-		File directory = new File(path.substring(6, path.length() - 17) + File.separator + "Tables" + File.separator + "student" + File.separator);
-		File[] contents = directory.listFiles();
-		int[] pageDel = {0, 2}; // Example pages to delete
-		for (int i = 0; i < pageDel.length; i++) {
-			contents[pageDel[i]].delete();
-		}
-
-		System.out.println("File Manager trace after deleting pages: " + FileManager.trace());
-
-		// Validate and check missing records
-		ArrayList<String[]> tr = validateRecords("student");
-		System.out.println("Missing records count: " + tr.size());
-
-		// Recover missing records (if any)
-		tr = validateRecords("student");
-		System.out.println("Missing record count: " + tr.size());
-		System.out.println("File Manager trace after recovering missing records: " + FileManager.trace());
-		System.out.println("--------------------------------");
-
-		// Full trace of the table again
-		System.out.println("Full trace of the table: ");
-		System.out.println(getFullTrace("student"));
 	}
 }
