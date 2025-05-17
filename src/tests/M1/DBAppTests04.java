@@ -1,4 +1,4 @@
-package DBMS;
+package tests.M1;
 import static org.junit.Assert.assertTrue;
 import java.util.*;
 import org.junit.Test;
