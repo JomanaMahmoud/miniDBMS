@@ -425,79 +425,16 @@ public class DBApp {
 		if(missing == null || missing.isEmpty()) return;
 
 		Table t = FileManager.loadTable(tableName);
-//		int pageSize = t.getPageSize();
 		ArrayList<Integer> missingPages = new ArrayList<Integer>();
 		for(Page page : t.getPages()){
 			int pageNumber = page.getPageNumber();
 			if(FileManager.loadTablePage(tableName,pageNumber)==null)
 			{
 				missingPages.add(pageNumber);
-//				Page recoveredPage = new Page(pageSize,pageNumber);
+
 				FileManager.storeTablePage(tableName,pageNumber,page);
 			}
 		}
-
-		//		Table table = FileManager.loadTable(tableName);
-//		int pageIndexPos = table.getColumnNames().length; // index of page number in the String[] row
-//
-//		// Map from page number to list of recovered records
-//		HashMap<Integer, ArrayList<Record>> recordsByPage = new HashMap<>();
-//
-//		int missingSize = missing.size();
-//		//  Group records by page number
-//		for (int i = 0; i < missingSize; i++) {
-//			String[] row = missing.get(i);
-//			int pageNumber = Integer.parseInt(row[pageIndexPos]);
-//
-//			String[] columnNames = table.getColumnNames();
-//			ArrayList<String> columnTypes = table.columnTypes;
-//			ArrayList<Object> values = new ArrayList<>();
-//
-//			for (int j = 0; j < columnNames.size(); j++) {
-//				String type = columnTypes.get(j);
-//				String val = row[j];
-//
-//				if (type.equals("java.lang.Integer")) {
-//					values.add(Integer.parseInt(val));
-//				} else if (type.equals("java.lang.Double")) {
-//					values.add(Double.parseDouble(val));
-//				} else if (type.equals("java.lang.String")) {
-//					values.add(val);
-//				} else {
-//					throw new RuntimeException("Unsupported type: " + type);
-//				}
-//			}
-//
-//			Record record = new Record(values);
-//
-//			if (!recordsByPage.containsKey(pageNumber)) {
-//				recordsByPage.put(pageNumber, new ArrayList<Record>());
-//			}
-//			recordsByPage.get(pageNumber).add(record);
-//		}
-//
-//		// Write recovered records to their original pages
-//		ArrayList<Integer> pageNumbers = new ArrayList<>(recordsByPage.keySet());
-//		for (int i = 0; i < pageNumbers.size(); i++) {
-//			Integer pageNumber = pageNumbers.get(i);
-//			ArrayList<Record> recoveredRecords = recordsByPage.get(pageNumber);
-//
-//			String pageFileName = tableName + "_" + pageNumber + ".ser";
-//			FileManager.writePageFile(pageFileName, recoveredRecords);
-//
-//			// Insert back into table.records in the correct position
-//			int start = pageNumber * Table.MAX_RECORDS_PER_PAGE;
-//			for (int j = 0; j < recoveredRecords.size(); j++) {
-//				if (start + j < table.records.size()) {
-//					table.records.set(start + j, recoveredRecords.get(j));
-//				} else {
-//					table.records.add(recoveredRecords.get(j));
-//				}
-//			}
-//		}
-//
-//		//  Store the updated table to disk
-//		FileManager.storeTablePages(table);
 
 		// Update the trace
 		ArrayList<String> tableTrace = tableTraces.get(tableName);
@@ -611,6 +548,9 @@ public class DBApp {
 					// If a required value doesn't exist in an index, no records match ALL conditions
 					long endTime = System.nanoTime();
 					long executionTime = (endTime - startTime) / 1000000;
+
+					Arrays.sort(cols);
+					Arrays.sort(vals);
 					// Match PDF format for early exit trace
 					tableTraces.get(table.getTableName()).add("Select index condition: " + Arrays.toString(cols) + "->" + Arrays.toString(vals) +
 							", Indexed columns: " + Arrays.toString(cols) +
@@ -627,6 +567,9 @@ public class DBApp {
 					if (combinedBitSet.isEmpty()) {
 						long endTime = System.nanoTime();
 						long executionTime = (endTime - startTime) / 1000000;
+
+						Arrays.sort(cols);
+						Arrays.sort(vals);
 						// Match PDF format for early exit trace
 						tableTraces.get(table.getTableName()).add("Select index condition: " + Arrays.toString(cols) + "->" + Arrays.toString(vals) +
 								", Indexed columns: " + Arrays.toString(cols) +
@@ -668,6 +611,9 @@ public class DBApp {
 
 		long endTime = System.nanoTime(); // End time for trace
 		long executionTime = (endTime - startTime) / 1000000;
+
+		Arrays.sort(cols);
+		Arrays.sort(vals);
 		// Trace for successful completion (matching PDF output format)
 		tableTraces.get(table.getTableName()).add("Select index condition: " + Arrays.toString(cols) + "->" + Arrays.toString(vals) +
 				", Indexed columns: " + Arrays.toString(cols) + // Use cols array for trace
