@@ -140,4 +140,8 @@ public class Table implements Serializable
 				". Calculated page: " + pageNumber + ", index in page: " + recordIndexInPage);
 		return null; // Indicate record not found or could not be loaded
 	}
+
+	public int getPageSize() {
+		return pageSize;
+	}
 }

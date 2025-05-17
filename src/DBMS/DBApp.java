@@ -88,8 +88,10 @@ public class DBApp {
 					colName = colNames[i];
 					if (indices != null && indices.contains(colName)) {
 						BitmapIndex b = FileManager.loadTableIndex(tableName, colName);
-						b.insertIntoBitMapIndex(record[i], t.getRecordsCount()-1);
-						FileManager.storeTableIndex(tableName,colName,b);
+						if(b != null){
+							b.insertIntoBitMapIndex(record[i], t.getRecordsCount()-1);
+							FileManager.storeTableIndex(tableName,colName,b);
+						}
 					}
 				}
 			}
@@ -267,6 +269,7 @@ public class DBApp {
 		else {
 			Table t = FileManager.loadTable(tableName);
 			List<String> indexedCols = tableIndices.getOrDefault(tableName, new ArrayList<>());
+			Collections.sort(indexedCols);
 			trace.add("Pages Count: " + t.getPagesCount() + ", Records Count: " + t.getRecordsCount() + ", Indexed Columns: " + indexedCols.toString());
 		}
 		return String.join("\n", trace);
@@ -413,6 +416,95 @@ public class DBApp {
 		tableTraces.get(tableName).add("Validating records: " + resultRecords.size() + " records missing.");
 		return resultRecords;
 	}
+
+	public static void recoverRecords(String tableName, ArrayList<String[]> missing) throws Exception {
+		if(tableName == null || tableName.equals("") || tableName.equals(" ")) {
+			throw new IllegalArgumentException("Table name cannot be null or empty.");
+		}
+
+		if(missing == null || missing.isEmpty()) return;
+
+		Table t = FileManager.loadTable(tableName);
+//		int pageSize = t.getPageSize();
+		ArrayList<Integer> missingPages = new ArrayList<Integer>();
+		for(Page page : t.getPages()){
+			int pageNumber = page.getPageNumber();
+			if(FileManager.loadTablePage(tableName,pageNumber)==null)
+			{
+				missingPages.add(pageNumber);
+//				Page recoveredPage = new Page(pageSize,pageNumber);
+				FileManager.storeTablePage(tableName,pageNumber,page);
+			}
+		}
+
+		//		Table table = FileManager.loadTable(tableName);
+//		int pageIndexPos = table.getColumnNames().length; // index of page number in the String[] row
+//
+//		// Map from page number to list of recovered records
+//		HashMap<Integer, ArrayList<Record>> recordsByPage = new HashMap<>();
+//
+//		int missingSize = missing.size();
+//		//  Group records by page number
+//		for (int i = 0; i < missingSize; i++) {
+//			String[] row = missing.get(i);
+//			int pageNumber = Integer.parseInt(row[pageIndexPos]);
+//
+//			String[] columnNames = table.getColumnNames();
+//			ArrayList<String> columnTypes = table.columnTypes;
+//			ArrayList<Object> values = new ArrayList<>();
+//
+//			for (int j = 0; j < columnNames.size(); j++) {
+//				String type = columnTypes.get(j);
+//				String val = row[j];
+//
+//				if (type.equals("java.lang.Integer")) {
+//					values.add(Integer.parseInt(val));
+//				} else if (type.equals("java.lang.Double")) {
+//					values.add(Double.parseDouble(val));
+//				} else if (type.equals("java.lang.String")) {
+//					values.add(val);
+//				} else {
+//					throw new RuntimeException("Unsupported type: " + type);
+//				}
+//			}
+//
+//			Record record = new Record(values);
+//
+//			if (!recordsByPage.containsKey(pageNumber)) {
+//				recordsByPage.put(pageNumber, new ArrayList<Record>());
+//			}
+//			recordsByPage.get(pageNumber).add(record);
+//		}
+//
+//		// Write recovered records to their original pages
+//		ArrayList<Integer> pageNumbers = new ArrayList<>(recordsByPage.keySet());
+//		for (int i = 0; i < pageNumbers.size(); i++) {
+//			Integer pageNumber = pageNumbers.get(i);
+//			ArrayList<Record> recoveredRecords = recordsByPage.get(pageNumber);
+//
+//			String pageFileName = tableName + "_" + pageNumber + ".ser";
+//			FileManager.writePageFile(pageFileName, recoveredRecords);
+//
+//			// Insert back into table.records in the correct position
+//			int start = pageNumber * Table.MAX_RECORDS_PER_PAGE;
+//			for (int j = 0; j < recoveredRecords.size(); j++) {
+//				if (start + j < table.records.size()) {
+//					table.records.set(start + j, recoveredRecords.get(j));
+//				} else {
+//					table.records.add(recoveredRecords.get(j));
+//				}
+//			}
+//		}
+//
+//		//  Store the updated table to disk
+//		FileManager.storeTablePages(table);
+
+		// Update the trace
+		ArrayList<String> tableTrace = tableTraces.get(tableName);
+		tableTrace.add("Recovering " + missing.size() + " records in pages: " + missingPages.toString() +".");
+		tableTraces.put(tableName, tableTrace);
+	}
+
 	public static ArrayList<String[]> selectIndex(String tableName, String[] cols, String[] vals) { // Removed throws DBAppException
 		// Removed startTime here
 
@@ -431,17 +523,17 @@ public class DBApp {
 				if (!tableColNamesSet.contains(col)) {
 					System.err.println("Error: Column '" + col + "' not found in table '" + tableName + "' during selectIndex.");
 					// Add error trace to table if it exists
-					if (tableTraces.containsKey(tableName)) {
-						tableTraces.get(tableName).add("Select Index Error: Column '" + col + "' not found.");
-					}
+//					if (tableTraces.containsKey(tableName)) {
+//						tableTraces.get(tableName).add("Select Index Error: Column '" + col + "' not found.");
+//					}
 					return new ArrayList<>(); // Return empty list on invalid column
 				}
 			}
 		} catch (Exception e) { // Catch errors like table.getColumnNames() failing
 			System.err.println("Error checking columns for table '" + tableName + "' during selectIndex: " + e.getMessage());
-			if (tableTraces.containsKey(tableName)) {
-				tableTraces.get(tableName).add("Select Index Error: Checking columns failed: " + e.getMessage());
-			}
+//			if (tableTraces.containsKey(tableName)) {
+//				tableTraces.get(tableName).add("Select Index Error: Checking columns failed: " + e.getMessage());
+//			}
 			return new ArrayList<>(); // Return empty list on error
 		}
 
@@ -498,7 +590,7 @@ public class DBApp {
 					long endTime = System.nanoTime();
 					long executionTime = (endTime - startTime) / 1000000;
 					System.err.println("Error: Index not found for column: '" + colName + "' unexpectedly during selectCase1 for table " + table.getTableName());
-					tableTraces.get(table.getTableName()).add("Select Case 1 Error: Index not found for " + colName + ", execution time (mil):" + executionTime);
+//					tableTraces.get(table.getTableName()).add("Select Case 1 Error: Index not found for " + colName + ", execution time (mil):" + executionTime);
 					return result; // Return empty list on error
 				}
 				loadedIndices.put(colName, index);
@@ -570,7 +662,7 @@ public class DBApp {
 			long executionTime = (endTime - startTime) / 1000000;
 			System.err.println("Error during selectCase1_AllIndexedColumns for table '" + table.getTableName() + "': " + e.getMessage());
 			e.printStackTrace(); // Print stack trace for debugging
-			tableTraces.get(table.getTableName()).add("Select Case 1 Error: " + e.getMessage() + ", execution time (mil):" + executionTime);
+//			tableTraces.get(table.getTableName()).add("Select Case 1 Error: " + e.getMessage() + ", execution time (mil):" + executionTime);
 			return new ArrayList<>(); // Return empty list on error
 		}
 
@@ -601,7 +693,7 @@ public class DBApp {
 					long endTime = System.nanoTime();
 					long executionTime = (endTime - startTime) / 1000000;
 					System.err.println("Error: Index not found for column: '" + colName + "' unexpectedly during selectCase2 for table " + table.getTableName());
-					tableTraces.get(table.getTableName()).add("Select Case 2 Error: Index not found for " + colName + ", execution time (mil):" + executionTime);
+//					tableTraces.get(table.getTableName()).add("Select Case 2 Error: Index not found for " + colName + ", execution time (mil):" + executionTime);
 					return result;
 				}
 				loadedIndices.put(colName, index);
@@ -626,6 +718,8 @@ public class DBApp {
 					ArrayList<String> notIndexedColNames = new ArrayList<>();
 					for(int idx : notIndexedColIndicesInQuery) notIndexedColNames.add(cols[idx]);
 
+					Collections.sort(indexedColNames);
+					Collections.sort(notIndexedColNames);
 					// Match PDF format for early exit trace
 					tableTraces.get(table.getTableName()).add("Select index condition: " + Arrays.toString(cols) + "->" + Arrays.toString(vals) +
 							", Indexed columns: " + indexedColNames.toString() +
@@ -646,6 +740,9 @@ public class DBApp {
 						for(int idx : indexedColIndicesInQuery) indexedColNames.add(cols[idx]);
 						ArrayList<String> notIndexedColNames = new ArrayList<>();
 						for(int idx : notIndexedColIndicesInQuery) notIndexedColNames.add(cols[idx]);
+
+						Collections.sort(indexedColNames);
+						Collections.sort(notIndexedColNames);
 						// Match PDF format for early exit trace
 						tableTraces.get(table.getTableName()).add("Select index condition: " + Arrays.toString(cols) + "->" + Arrays.toString(vals) +
 								", Indexed columns: " + indexedColNames.toString() +
@@ -662,7 +759,7 @@ public class DBApp {
 				long endTime = System.nanoTime();
 				long executionTime = (endTime - startTime) / 1000000;
 				System.err.println("Logical Error: combinedBitSet is null after processing indexed columns in selectCase2 for table " + table.getTableName());
-				tableTraces.get(table.getTableName()).add("Select Case 2 Error: Logical Error combinedBitSet null, execution time (mil):" + executionTime);
+//				tableTraces.get(table.getTableName()).add("Select Case 2 Error: Logical Error combinedBitSet null, execution time (mil):" + executionTime);
 				return result;
 			}
 
@@ -686,7 +783,7 @@ public class DBApp {
 				long executionTime = (endTime - startTime) / 1000000;
 				System.err.println("Error getting column index for non-indexed column during selectCase2: " + e.getMessage());
 				e.printStackTrace(); // Print stack trace for debugging
-				tableTraces.get(table.getTableName()).add("Select Case 2 Error: Invalid non-indexed column: " + e.getMessage() + ", execution time (mil):" + executionTime);
+//				tableTraces.get(table.getTableName()).add("Select Case 2 Error: Invalid non-indexed column: " + e.getMessage() + ", execution time (mil):" + executionTime);
 				return result; // Return empty list if a column is invalid
 			}
 
@@ -734,7 +831,7 @@ public class DBApp {
 			long executionTime = (endTime - startTime) / 1000000;
 			System.err.println("Error during selectCase2_SomeIndexedColumns for table '" + table.getTableName() + "': " + e.getMessage());
 			e.printStackTrace(); // Print stack trace for debugging
-			tableTraces.get(table.getTableName()).add("Select Case 2 Error: " + e.getMessage() + ", execution time (mil):" + executionTime);
+//			tableTraces.get(table.getTableName()).add("Select Case 2 Error: " + e.getMessage() + ", execution time (mil):" + executionTime);
 			return new ArrayList<>(); // Return empty list on error
 		}
 
@@ -746,6 +843,8 @@ public class DBApp {
 		ArrayList<String> notIndexedColNames = new ArrayList<>(); // ** CREATE LIST HERE **
 		for(int idx : notIndexedColIndicesInQuery) notIndexedColNames.add(cols[idx]); // ** Populate it here **
 
+		Collections.sort(indexedColNames);
+		Collections.sort(notIndexedColNames);
 		// Match PDF format for successful completion trace
 		tableTraces.get(table.getTableName()).add("Select index condition: " + Arrays.toString(cols) + "->" + Arrays.toString(vals) +
 				", Indexed columns: " + indexedColNames.toString() + // Use list of names
@@ -772,7 +871,7 @@ public class DBApp {
 				long executionTime = (endTime - startTime) / 1000000;
 				// Handle error
 				System.err.println("Error: Index not found for column: '" + colName + "' unexpectedly during selectCase3 for table " + table.getTableName());
-				tableTraces.get(table.getTableName()).add("Select Case 3 Error: Index not found for " + colName + ", execution time (mil):" + executionTime);
+//				tableTraces.get(table.getTableName()).add("Select Case 3 Error: Index not found for " + colName + ", execution time (mil):" + executionTime);
 				return result; // Return empty list on error
 			}
 
@@ -805,7 +904,7 @@ public class DBApp {
 				long executionTime = (endTime - startTime) / 1000000;
 				System.err.println("Error getting column index for non-indexed column during selectCase3: " + e.getMessage());
 				e.printStackTrace();
-				tableTraces.get(table.getTableName()).add("Select Case 3 Error: Invalid non-indexed column: " + e.getMessage() + ", execution time (mil):" + executionTime);
+//				tableTraces.get(table.getTableName()).add("Select Case 3 Error: Invalid non-indexed column: " + e.getMessage() + ", execution time (mil):" + executionTime);
 				return result; // Return empty list if a column is invalid
 			}
 
@@ -849,13 +948,14 @@ public class DBApp {
 			long executionTime = (endTime - startTime) / 1000000;
 			System.err.println("Error during selectCase3_OneIndexedColumn for table '" + table.getTableName() + "': " + e.getMessage());
 			e.printStackTrace(); // Print stack trace for debugging
-			tableTraces.get(table.getTableName()).add("Select Case 3 Error: " + e.getMessage() + ", execution time (mil):" + executionTime);
+//			tableTraces.get(table.getTableName()).add("Select Case 3 Error: " + e.getMessage() + ", execution time (mil):" + executionTime);
 			return new ArrayList<>(); // Return empty list on error
 		}
 
 		long endTime = System.nanoTime(); // End time for trace
 		long executionTime = (endTime - startTime) / 1000000;
 		// Trace for successful completion (matching PDF output format)
+		Collections.sort(otherColNames);
 		tableTraces.get(table.getTableName()).add("Select index condition: " + Arrays.toString(cols) + "->" + Arrays.toString(vals) +
 				", Indexed columns: [" + cols[indexedIdx] + "]" + // Trace format from example
 				", Indexed selection count: " + indexedSelectionCount + // Cardinality of the single index result
@@ -868,8 +968,16 @@ public class DBApp {
 
 
 	private static ArrayList<String[]> selectCase4_NoIndexedColumns(Table table, String[] cols, String[] vals) {
-
+		long startTime = System.nanoTime(); // Start time for trace
 		ArrayList<String[]> result = select(table.getTableName(), cols, vals);
+		long endTime = System.nanoTime(); // End time for trace
+		long executionTime = (endTime - startTime) / 1000000;
+		Arrays.sort(cols);
+		tableTraces.get(table.getTableName()).add("Select index condition: " + Arrays.toString(cols) + "->" + Arrays.toString(vals) +
+				", Indexed selection count: 0" +
+				", Non Indexed: " + Arrays.toString(cols) +
+				", Final count: " + result.size() +
+				", execution time (mil):" + executionTime);
 		return result;
 	}
 
