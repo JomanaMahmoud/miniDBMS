@@ -37,7 +37,9 @@ public class DBApp {
 		if (columnsNames == null || columnsNames.length == 0) {
 			throw new IllegalArgumentException("Column names cannot be null or empty");
 		}
+
 		tableTraces.put(tableName, new ArrayList<>());
+		tableIndices.put(tableName, new ArrayList<String>());
 
 		if (FileManager.loadTable(tableName) != null) {
 			throw new IllegalArgumentException("Table '" + tableName + "' already exists.");
@@ -331,9 +333,7 @@ public class DBApp {
 				b.createBitMapIndex(records,index);
 
 				if(tableIndices.containsKey(tableName)) {
-					ArrayList<String> indices = tableIndices.get(tableName);
-					indices.add(colName);
-					tableIndices.put(tableName, indices);
+					tableIndices.get(tableName).add(colName);
 				}
 				else {
 					ArrayList<String> newList = new ArrayList<>();
