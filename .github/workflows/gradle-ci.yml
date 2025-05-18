@@ -1,4 +1,4 @@
-name: Java CI with Gradle - Hourly Test (Egypt Time Aligned)
+name: Java CI with Gradle - Periodic Test
 
 on:
   push:
@@ -10,28 +10,29 @@ on:
   workflow_dispatch:
 
   schedule:
-    # This still means "at minute 0 of every hour, UTC".
-    # This will naturally align with the top of every hour in Egyptian time,
-    # just be aware of the 2 or 3 hour offset for when that UTC hour occurs.
-    - cron: '0 * * * *'
+    # Run at minute 0 and 30 of every hour (UTC)
+    - cron: '*/30 * * * *'
 
 jobs:
-  # ... (rest of your job definition remains the same)
   build-and-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'gradle'
+
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
       - name: Build and test with Gradle
-        run: ./gradlew test
+        run: ./gradlew clean test 
+
       - name: Upload Test Report
         if: always()
         uses: actions/upload-artifact@v4
