@@ -1,0 +1,66 @@
+// build.gradle
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = []
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/DBMS']
+        }
+    }
+}
+
+dependencies {
+    // Dependency for JUnit 4
+    testImplementation 'junit:junit:4.13.2'
+}
+
+// --- CONFIGURE HOW TESTS ARE RUN ---
+test {
+    // === CHANGE THIS ===
+    // useJUnitPlatform() // REMOVE THIS LINE (it's for JUnit 5)
+    useJUnit()         // ADD THIS LINE (it's for JUnit 4)
+
+    // Optional: For more detailed test output in the console when you run tests.
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+
+    // === MOVE YOUR INCLUDES HERE ===
+    // These lines tell Gradle WHICH TEST CLASSES TO RUN.
+    // Make sure the package part ('DBMS/') is correct.
+    // If your files in src/DBMS/ do NOT have 'package DBMS;' at the top,
+    // then remove 'DBMS/' from these lines (e.g., include 'MS2_Tests_01.class').
+
+    include 'DBMS/MS2_Tests_01.class'
+    include 'DBMS/MS2_Tests_02.class'
+    include 'DBMS/MS2_Tests_03.class'
+    include 'DBMS/MS2_Tests_04.class'
+    include 'DBMS/MS2_Tests_05.class'
+    include 'DBMS/MS2_Tests_06.class'
+    include 'DBMS/MS2_Tests_07.class'
+    include 'DBMS/MS2_Tests_08.class'
+    include 'DBMS/MS2_Tests_09.class'
+    include 'DBMS/MS2_Tests_10.class'
+    include 'DBMS/MS2_Tests_11.class'
+
+    // You might also want to include these if they are test files:
+    // include 'DBMS/DBApp.class'        // Only if DBApp.java contains @Test methods
+    // include 'DBMS/DBAppTests.class'
+    // include 'DBMS/DBAppTestsMS2.class'
+}
