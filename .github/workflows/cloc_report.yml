@@ -11,7 +11,7 @@ jobs:
     name: Generate cloc Report
     runs-on: ubuntu-latest
     permissions:
-      contents: read # Needed for actions/checkout
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -26,7 +26,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: .last_cloc_processed_sha.txt
-          key: cloc-processed-sha-${{ github.ref_name }} # e.g., cloc-processed-sha-main
+          key: cloc-processed-sha-${{ github.ref_name }}
 
       - name: Decide if cloc needs to run
         id: decide_run
@@ -55,16 +55,11 @@ jobs:
           fi
           echo "run_cloc=${RUN_CLOC}" >> $GITHUB_OUTPUT
 
-      - name: Install cloc
+      - name: Install cloc (via apt)
         if: steps.decide_run.outputs.run_cloc == 'true'
         run: |
-          echo "Installing latest cloc from GitHub..."
-          # Ensure curl and perl are installed (apt-get handles if already installed)
-          sudo apt-get update && sudo apt-get install -y curl perl
-          # Use -L to follow redirects, -f to fail on server errors, -S to show errors if any, -o for output
-          sudo curl -LfSo /usr/local/bin/cloc https://github.com/AlDanial/cloc/releases/latest/download/cloc
-          sudo chmod +x /usr/local/bin/cloc
-          echo "cloc version:"
+          sudo apt-get update
+          sudo apt-get install -y cloc
           cloc --version
 
       - name: Run cloc and generate report
@@ -73,25 +68,23 @@ jobs:
         run: |
           echo "Running cloc..."
           REPORT_FILE="cloc_report_$(date +%Y-%m).txt"
-          
-          # Note the corrected regex for --not-match-f
-          # It matches basenames like MS2_Tests_01.java, etc.
-          # --not-match-b matches basenames like DBAppTests.java, DBAppTestsMS2.java
+
+          # --not-match-f: Exclude MS2_Tests_01.java, ..., MS2_Tests_11.java
+          # --not-match-b: Exclude DBAppTests.java, DBAppTestsMS2.java, etc.
           cloc . \
             --exclude-dir=.git,.github,.gradle,build,out,dist,node_modules,vendor \
             --not-match-f='^MS2_Tests_(0[1-9]|10|11)\.java$' \
             --not-match-b='^DBAppTests.*' \
             --report-file="$REPORT_FILE"
-            
+
           echo "cloc report generated: $REPORT_FILE"
           echo "--- cloc Report Start ---"
           cat "$REPORT_FILE"
           echo "--- cloc Report End ---"
-          
+
           echo "REPORT_FILENAME=${REPORT_FILE}" >> $GITHUB_ENV
           # Create/Update the SHA file for caching for the next run
           echo "${{ steps.get_head_sha.outputs.sha }}" > .last_cloc_processed_sha.txt
-          echo "Updated .last_cloc_processed_sha.txt with current SHA: ${{ steps.get_head_sha.outputs.sha }}"
 
       - name: Upload cloc Report Artifact
         if: steps.decide_run.outputs.run_cloc == 'true'
@@ -106,4 +99,4 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: .last_cloc_processed_sha.txt
-          key: cloc-processed-sha-${{ github.ref_name }} # Must match the restore key
+          key: cloc-processed-sha-${{ github.ref_name }}
