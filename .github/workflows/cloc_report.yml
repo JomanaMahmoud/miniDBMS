@@ -68,6 +68,8 @@ jobs:
           
           cloc . \
             --exclude-dir=.git,.github,.gradle,build,out,dist,node_modules,vendor \
+            --not-match-f='src/DBMS/MS2_Tests_(0[1-9]|10|11)\.java' \
+            --not-match-b='^DBAppTests.*' \
             --report-file="$REPORT_FILE"
             
           echo "cloc report generated: $REPORT_FILE"
@@ -92,7 +94,6 @@ jobs:
       - name: Save last cloc-processed SHA to cache
         # This step will only run if cloc was executed because .last_cloc_processed_sha.txt
         # is only updated in the 'Run cloc and generate report' step, which is conditional.
-        # More robust: also make this step conditional on run_cloc == 'true'
         if: steps.decide_run.outputs.run_cloc == 'true' && steps.run_cloc_step.outcome == 'success'
         uses: actions/cache/save@v4 # Explicitly use save action
         with:
