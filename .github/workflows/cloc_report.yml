@@ -12,14 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read # Needed for actions/checkout
-      # Caches also sometimes need actions:write for some scopes, but usually not for basic cache.
-      # If you encounter permission issues with cache, you might need to adjust.
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        # fetch-depth: 0 # Default is 1. If you need full history for other reasons, uncomment.
-                         # For just getting HEAD SHA, depth 1 is fine.
 
       - name: Get current commit SHA
         id: get_head_sha
@@ -27,12 +23,10 @@ jobs:
 
       - name: Restore last cloc-processed SHA from cache
         id: cache-restore-last-sha
-        uses: actions/cache/restore@v4 # Explicitly use restore action
+        uses: actions/cache/restore@v4
         with:
-          path: .last_cloc_processed_sha.txt # File to store the SHA
-          # Key specific to this workflow and branch.
-          # We don't include the current SHA here because we want to restore the *previous* run's SHA.
-          key: cloc-processed-sha-${{ github.ref_name }} # e.g., cloc-processed-sha-main
+          path: .last_cloc_processed_sha.txt
+          key: cloc-processed-sha-${{ github.ref_name }}
 
       - name: Decide if cloc needs to run
         id: decide_run
@@ -57,11 +51,19 @@ jobs:
 
       - name: Install cloc
         if: steps.decide_run.outputs.run_cloc == 'true'
-        run: sudo apt-get update && sudo apt-get install -y cloc
+        run: |
+          echo "Installing latest cloc from GitHub..."
+          # sudo apt-get update # curl doesn't strictly need this, but good if other apt installs were present
+          # Ensure curl and perl are installed
+          sudo apt-get install -y curl perl
+          sudo curl -Lo /usr/local/bin/cloc https://github.com/AlDanial/cloc/releases/latest/download/cloc
+          sudo chmod +x /usr/local/bin/cloc
+          echo "cloc version:"
+          cloc --version
 
       - name: Run cloc and generate report
         if: steps.decide_run.outputs.run_cloc == 'true'
-        id: run_cloc_step # Give this step an ID
+        id: run_cloc_step
         run: |
           echo "Running cloc..."
           REPORT_FILE="cloc_report_$(date +%Y-%m).txt"
@@ -78,10 +80,8 @@ jobs:
           echo "--- cloc Report End ---"
           
           echo "REPORT_FILENAME=${REPORT_FILE}" >> $GITHUB_ENV
-          # Create/Update the SHA file for caching for the next run
           echo "${{ steps.get_head_sha.outputs.sha }}" > .last_cloc_processed_sha.txt
           echo "Updated .last_cloc_processed_sha.txt with current SHA: ${{ steps.get_head_sha.outputs.sha }}"
-
 
       - name: Upload cloc Report Artifact
         if: steps.decide_run.outputs.run_cloc == 'true'
@@ -92,10 +92,8 @@ jobs:
           retention-days: 90
 
       - name: Save last cloc-processed SHA to cache
-        # This step will only run if cloc was executed because .last_cloc_processed_sha.txt
-        # is only updated in the 'Run cloc and generate report' step, which is conditional.
         if: steps.decide_run.outputs.run_cloc == 'true' && steps.run_cloc_step.outcome == 'success'
-        uses: actions/cache/save@v4 # Explicitly use save action
+        uses: actions/cache/save@v4
         with:
           path: .last_cloc_processed_sha.txt
-          key: cloc-processed-sha-${{ github.ref_name }} # Must match the restore key
+          key: cloc-processed-sha-${{ github.ref_name }}
