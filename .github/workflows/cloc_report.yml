@@ -11,7 +11,7 @@ jobs:
     name: Generate cloc Report
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: read # Needed for actions/checkout
 
     steps:
       - name: Checkout repository
@@ -55,11 +55,14 @@ jobs:
           fi
           echo "run_cloc=${RUN_CLOC}" >> $GITHUB_OUTPUT
 
-      - name: Install cloc (via apt)
+      - name: Install latest cloc (Perl script)
         if: steps.decide_run.outputs.run_cloc == 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cloc
+          sudo apt-get install -y perl
+          curl -LfSo cloc https://raw.githubusercontent.com/AlDanial/cloc/master/cloc
+          chmod +x cloc
+          sudo mv cloc /usr/local/bin/cloc
           cloc --version
 
       - name: Run cloc and generate report
