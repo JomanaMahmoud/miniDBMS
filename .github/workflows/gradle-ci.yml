@@ -9,9 +9,9 @@ on:
       - main
   workflow_dispatch:
 
-  schedule:
-    # Run at minute 0 and 30 of every hour (UTC)
-    - cron: '*/30 * * * *'
+  # schedule:
+  #   # Run at minute 0 and 30 of every hour (UTC)
+  #   - cron: '*/30 * * * *'
 
 jobs:
   build-and-test:
