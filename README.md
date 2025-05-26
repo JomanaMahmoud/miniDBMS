@@ -16,7 +16,7 @@ A Java-based project for the CSEN604 - Data Bases II course at the German Univer
 - [Technology Stack](#technology-stack)
 - [Core Components](#core-components)
 - [Trace Functionality](#trace-functionality)
-- [Data Recovery (MS2)](#data-recovery-ms2)
+- [Data Recovery](#data-recovery)
 - [Usage Example](#usage-example)
 - [Team Members](#team-members)
 - [Acknowledgements](#acknowledgements)
@@ -38,7 +38,6 @@ This project aims to provide a deeper understanding of the internal components a
 ## Features Implemented
 
 ### Milestone 1
-*(Deadline: 10/4 at 11:59 pm)*
 
 1.  **Create Table**:
     *   Defines a new table schema with specified column names.
@@ -54,7 +53,6 @@ This project aims to provide a deeper understanding of the internal components a
     *   Provides a full or partial log of operations performed on a table, including timestamps.
 
 ### Milestone 2
-*(Deadline: 19/5 at 11:59 pm)*
 
 1.  **Create Bitmap Index**:
     *   Generates a Bitmap index for a specified column in a table.
@@ -111,17 +109,17 @@ The project revolves around several key Java files:
     *   Key methods include:
         *   `storeTable(tableName, Table)` / `loadTable(tableName)`
         *   `storeTablePage(tableName, pageNumber, Page)` / `loadTablePage(tableName, pageNumber)`
-        *   `storeTableIndex(tableName, columnName, BitmapIndex)` / `loadTableIndex(tableName, columnName)` (MS2)
+        *   `storeTableIndex(tableName, columnName, BitmapIndex)` / `loadTableIndex(tableName, columnName)`
         *   `reset()`: Clears the "Tables" directory.
         *   `trace()`: Returns a string representation of the "Tables" directory structure.
 
-3.  **`DBAppTests.java` / `DBAppTestsMS2.java`**:
+3.  **`DBAppTests.java`**:
     *   Provided JUnit test files for evaluating the `DBApp.java` implementation. These files are not to be modified.
 
 4.  **Optional Helper Classes**:
     *   `Table.java`: Could represent a table's metadata and structure.
     *   `Page.java`: Could represent a single page containing records.
-    *   `BitMapIndex.java` (MS2): Could represent the Bitmap index structure for a column.
+    *   `BitMapIndex.java`: Could represent the Bitmap index structure for a column.
 
 ## Trace Functionality
 
@@ -136,7 +134,7 @@ Example trace line:
 `FileManager.trace()` provides a trace of the file system structure within the "Tables" directory.
 Example: `Tables{ student{ 0.db 1.db student.db } }`
 
-## Data Recovery (MS2)
+## Data Recovery
 
 Data recovery is implemented for scenarios where entire pages of a table are lost.
 1.  `validateRecords(String tableName)`: Checks for missing records by inspecting the sequence and completeness of pages. It returns an `ArrayList<String[]>` of the records that were in the deleted pages.
