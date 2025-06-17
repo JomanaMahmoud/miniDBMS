@@ -3,7 +3,7 @@
 [![Milestone 2 Tests](https://github.com/JomanaMahmoud/miniDBMS/actions/workflows/gradle-ci.yml/badge.svg)](https://github.com/JomanaMahmoud/miniDBMS/actions/workflows/gradle-ci.yml)
 <!-- [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) -->
 
-A Java-based project for the CSEN604 - Data Bases II course at the German University in Cairo (GUC), Spring 2025. This project implements a subset of DBMS functionalities, focusing on core operations, data storage, indexing, and recovery.
+A Java-based project that implements a subset of DBMS functionalities, focusing on core operations (Table Creation, Insertion and Selection), data storage, indexing, and recovery.
 
 ## Table of Contents
 
@@ -19,7 +19,6 @@ A Java-based project for the CSEN604 - Data Bases II course at the German Univer
 - [Data Recovery](#data-recovery)
 - [Usage Example](#usage-example)
 - [Team Members](#team-members)
-- [Acknowledgements](#acknowledgements)
 
 ## Introduction
 
@@ -203,7 +202,4 @@ public static void main(String[] args) throws IOException {
 *   [Rawan Hossam](https://github.com/rawanhossam27)
 *   [Nada Yasser](https://github.com/NadaYasser8)
 
-## Acknowledgements
-
-*   This project was completed under the supervision of **Dr. Mohamed Karam**, Faculty of Media Engineering and Technology, German University in Cairo (GUC).
-*   We would also like to acknowledge the GUC for providing the CSEN604 - Data Bases II course.
+---
